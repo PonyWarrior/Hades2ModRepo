@@ -1,20 +1,6 @@
--- ModUtil.Path.Wrap( "SetupMap", function ( base, ... )
---     LoadPackages({Names = {
---         "ZeusUpgrade",
---         "AphroditeUpgrade",
---         "ApolloUpgrade",
---         "DemeterUpgrade",
---         "HephaestusUpgrade",
---         "HestiaUpgrade",
---         "PoseidonUpgrade",
---     }})
---     return base(...)
--- end
-
 local mod = PonyMenu
 
 ModUtil.Path.Wrap( "SetupMap", function(baseFunc)
-    -- DebugPrint({Text = "@"..mod.." Loading all god packages!"})
     LoadPackages({Names = {
         "ZeusUpgrade",
         "AphroditeUpgrade",
@@ -40,6 +26,8 @@ local function setupData()
 	mod.BoonData.DemeterUpgrade = {}
 	mod.BoonData.HephaestusUpgrade = {}
 	mod.BoonData.HestiaUpgrade = {}
+
+    mod.ChildForm = false
 
 	mod.CommandData = {
 		{
@@ -116,6 +104,14 @@ local function setupData()
 		--     Type = "Command",
 		--     Function = mod.KillPlayer
 		-- },
+        -- {
+		--     IconPath = "GUI\\Screens\\MetaUpgrade\\CardTypeIcon_Death",
+		--     IconScale = 0.8,
+		--     Name = "Toggle Child/Adult",
+		--     Description = "Switches between child and adult Melinoe, applies after leaving the room.",
+		--     Type = "Command",
+		--     Function = mod.ToggleChildForm
+		-- },
 
 	}
 
@@ -148,7 +144,7 @@ local function setupData()
 					X = ScreenCenterX,
 					Y = ScreenCenterY,
 					Scale = 1.15,
-					Text = "Pony Menu",
+					Text = "Boon Selector",
 					TextArgs =
 					{
 						FontSize = 32,
@@ -161,19 +157,133 @@ local function setupData()
 
 					Children =
 					{
+                        SpawnButton = 
+						{
+                            Name = "ButtonDefault",
+                            Group = "Combat_Menu_TraitTray",
+                            Scale = 1.2,
+                            ScaleX = 1.15,
+                            OffsetX = 0,
+                            OffsetY = 200,
+                            Text = "Spawn regular boon",
+                            TextArgs =
+                            {
+                                FontSize = 22,
+                                Width = 720,
+                                Color = Color.White,
+                                Font = "AlegreyaSansSCLight",
+                                ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
+                                Justification = "Center"
+                            },
+                            Data = {
+                                OnPressedFunctionName = mod.SpawnBoon,
+                            },
+						},
+                        --Rarity buttons
+                        CommonButton =
+						{
+                            Name = "ButtonDefault",
+                            Group = "Combat_Menu_TraitTray",
+                            Scale = 1.2,
+                            ScaleX = 0.8,
+                            OffsetX = -450,
+                            OffsetY = 300,
+                            Text = "Common",
+                            TextArgs =
+                            {
+                                FontSize = 22,
+                                Width = 720,
+                                Color = Color.BoonPatchCommon,
+                                Font = "AlegreyaSansSCLight",
+                                ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
+                                Justification = "Center"
+                            },
+                            Data = {
+                                OnPressedFunctionName = mod.ChangeBoonSelectorRarity,
+                                Rarity = "Common",
+                            },
+						},
+                        RareButton =
+						{
+                            Name = "ButtonDefault",
+                            Group = "Combat_Menu_TraitTray",
+                            Scale = 1.2,
+                            ScaleX = 0.8,
+                            OffsetX = -150,
+                            OffsetY = 300,
+                            Text = "Rare",
+                            TextArgs =
+                            {
+                                FontSize = 22,
+                                Width = 720,
+                                Color = Color.BoonPatchRare,
+                                Font = "AlegreyaSansSCLight",
+                                ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
+                                Justification = "Center"
+                            },
+                            Data = {
+                                OnPressedFunctionName = mod.ChangeBoonSelectorRarity,
+                                Rarity = "Rare",
+                            },
+						},
+                        EpicButton =
+						{
+                            Name = "ButtonDefault",
+                            Group = "Combat_Menu_TraitTray",
+                            Scale = 1.2,
+                            ScaleX = 0.8,
+                            OffsetX = 150,
+                            OffsetY = 300,
+                            Text = "Epic",
+                            TextArgs =
+                            {
+                                FontSize = 22,
+                                Width = 720,
+                                Color = Color.BoonPatchEpic,
+                                Font = "AlegreyaSansSCLight",
+                                ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
+                                Justification = "Center"
+                            },
+                            Data = {
+                                OnPressedFunctionName = mod.ChangeBoonSelectorRarity,
+                                Rarity = "Epic",
+                            },
+						},
+                        HeroicButton =
+						{
+                            Name = "ButtonDefault",
+                            Group = "Combat_Menu_TraitTray",
+                            Scale = 1.2,
+                            ScaleX = 0.8,
+                            OffsetX = 450,
+                            OffsetY = 300,
+                            Text = "Heroic",
+                            TextArgs =
+                            {
+                                FontSize = 22,
+                                Width = 720,
+                                Color = Color.BoonPatchHeroic,
+                                Font = "AlegreyaSansSCLight",
+                                ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
+                                Justification = "Center"
+                            },
+                            Data = {
+                                OnPressedFunctionName = mod.ChangeBoonSelectorRarity,
+                                Rarity = "Heroic",
+                            },
+						},
 						CloseButton = 
 						{
-							Graphic = "ContextualActionButton",
+							Graphic = "ButtonClose",
 							GroupName = "Combat_Menu_TraitTray",
-							OffsetX = - ( ScreenCenterX * 0.5),
-							OffsetY = - ScreenCenterY,
+                            Scale = 0.7,
+							OffsetX = 0,
+							OffsetY = ScreenCenterY - 70,
 							Data =
 							{
 								OnPressedFunctionName = mod.CloseBoonSelector,
 								ControlHotkeys = { "Cancel", },
 							},
-							Text = "Menu_Exit",
-							TextArgs = UIData.ContextualButtonFormatRight,
 						},
 					}
 				},
@@ -677,39 +787,6 @@ local function setupData()
 								Amount = -1000
 							},
 						},
-						-- -- Resource display
-						-- ResourceTextBox = {
-						--     Name = "BlankObstacle",
-						--     Group = "Combat_Menu_TraitTray",
-						--     OffsetX = -150,
-						--     OffsetY = 250,
-						--     Text = "None",
-						--     TextArgs =
-						--     {
-						--         FontSize = 22,
-						--         Width = 720,
-						--         Color = Color.White,
-						--         Font = "AlegreyaSansSCLight",
-						--         ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
-						--         Justification = "Center"
-						--     },
-						-- },
-						-- ResourceAmountTextBox = {
-						--     Name = "BlankObstacle",
-						--     Group = "Combat_Menu_TraitTray",
-						--     OffsetX = 100,
-						--     OffsetY = 250,
-						--     Text = "None",
-						--     TextArgs =
-						--     {
-						--         FontSize = 22,
-						--         Width = 720,
-						--         Color = Color.White,
-						--         Font = "AlegreyaSansSCLight",
-						--         ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
-						--         Justification = "Center"
-						--     },
-						-- },
 						-- Spawn button
 						SpawnButton = {
 							Name = "ButtonDefault",
@@ -734,17 +811,16 @@ local function setupData()
 						},
 						CloseButton = 
 						{
-							Graphic = "ContextualActionButton",
+							Graphic = "ButtonClose",
 							GroupName = "Combat_Menu_TraitTray",
-							OffsetX = - ( ScreenCenterX * 0.5),
-							OffsetY = - ScreenCenterY,
+                            Scale = 0.7,
+							OffsetX = 0,
+							OffsetY = ScreenCenterY - 70,
 							Data =
 							{
 								OnPressedFunctionName = mod.CloseBoonSelector,
 								ControlHotkeys = { "Cancel", },
 							},
-							Text = "Menu_Exit",
-							TextArgs = UIData.ContextualButtonFormatRight,
 						},
 					}
 				},
@@ -759,7 +835,7 @@ ModUtil.Path.Override("InventoryScreenDisplayCategory", function (screen, catego
 
 	args = args or {}
 	local components = screen.Components
-	
+
 	-- Cleanup prev category
 	local prevCategory = screen.ItemCategories[screen.ActiveCategoryIndex]
 	if prevCategory.CloseFunctionName ~= nil then
@@ -1005,6 +1081,7 @@ function mod.OpenBoonSelector(screen, button)
 	CloseInventoryScreen(screen, screen.ComponentData.ActionBar.Children.CloseButton)
 
     screen = DeepCopyTable(ScreenData.BoonSelector)
+    screen.Upgrade = button.ItemData.Name
 	local components = screen.Components
     local children = screen.ComponentData.Background.Children
     local boons = mod.BoonData[button.ItemData.Name]
@@ -1089,10 +1166,23 @@ function mod.CloseBoonSelector( screen )
 	notifyExistingWaiters("BoonSelector")
 end
 
+function mod.SpawnBoon(screen, button)
+    CreateLoot({ Name = screen.Upgrade, OffsetX = 100, SpawnPoint = CurrentRun.Hero.ObjectId })
+end
+
+function mod.ChangeBoonSelectorRarity(screen, button)
+    if screen.LockedRarityButton ~= nil and screen.LockedRarityButton ~= button then
+		ModifyTextBox({ Id = screen.LockedRarityButton.Id, Text = screen.LockedRarityButton.Rarity })
+	end
+	screen.Rarity = button.Rarity
+	screen.LockedRarityButton = button
+	ModifyTextBox({ Id = button.Id, Text = ">>"..button.Rarity.."<<" })
+end
+
 function mod.GiveBoonToPlayer(screen, button)
     local boon = button.Boon
 	if not HeroHasTrait(boon) then
-        AddTraitToHero({TraitData = GetProcessedTraitData({ Unit = CurrentRun.Hero, TraitName = boon, Rarity = "Common"})})
+        AddTraitToHero({TraitData = GetProcessedTraitData({ Unit = CurrentRun.Hero, TraitName = boon, Rarity = screen.Rarity})})
         mod.LockChoice(screen.Components, button)
     end
 end
@@ -1150,7 +1240,7 @@ function mod.ReloadRoom()
 end
 
 function mod.KillPlayer()
-    KillHero(CurrentRun.Hero, {})
+    KillHero({},{},{})
 end
 
 function mod.OpenResourceMenu(screen, button)
@@ -1218,6 +1308,23 @@ function mod.SpawnResource(screen, button)
 
 	AddResource(screen.Resource, screen.Amount)
 end
+
+function mod.ToggleChildForm(screen, button)
+    SetThingProperty({ Property = "GrannyTexture", Value = "null", DestinationId = CurrentRun.Hero.ObjectId })
+	SetupCostume( true )
+
+end
+
+-- ModUtil.Path.Wrap( "SetupHeroObject", function(baseFunc, room, applyLuaUpgrades)
+--     if mod.ChildForm then
+--         room.HeroUnitName = "PlayerMelFlashback"
+--         room.HeroOverwrites = {
+-- 			AttachedAnimationName = "LaurelCindersSpawner_Young",
+-- 			Portrait = "Portrait_Mel_Child_01",
+-- 		}
+--     end
+--     return baseFunc(room, applyLuaUpgrades)
+-- end)
 
 mod.Internal = ModUtil.UpValues( function() 
 	return setupData, mouseOverCommandItem, mouseOffCommandItem
