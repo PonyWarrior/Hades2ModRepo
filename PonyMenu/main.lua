@@ -26,6 +26,10 @@ local function setupData()
 	mod.BoonData.DemeterUpgrade = {}
 	mod.BoonData.HephaestusUpgrade = {}
 	mod.BoonData.HestiaUpgrade = {}
+	mod.BoonData.ArtemisUpgrade = {}
+    mod.BoonData.SpellDrop = {}
+    mod.BoonData.WeaponUpgrade = {}
+	mod.BoonData.Arachne = {}
 
     mod.ChildForm = false
 
@@ -71,6 +75,32 @@ local function setupData()
 			IconScale = 0.4,
 			Name = "HestiaUpgrade",
 			Type = "Boon"
+		},
+		{
+			Icon = "BoonSymbolArtemisIcon",
+			IconScale = 0.4,
+			Name = "ArtemisUpgrade",
+			Type = "Boon"
+		},
+        {
+			Icon = "SpellDropPreview",
+			IconScale = 0.4,
+			Name = "SpellDrop",
+			Type = "Boon",
+			NoRarity = true
+		},
+        {
+			Icon = "WeaponUpgradeSymbol",
+			IconScale = 0.4,
+			Name = "WeaponUpgrade",
+			Type = "Boon",
+            NoRarity = true
+		},
+		{
+			Icon = "ArmorBoost",
+			IconScale = 0.4,
+			Name = "Arachne",
+			Type = "Boon",
 		},
 		{
 			Icon = "TrashButtonFlash",
@@ -171,7 +201,7 @@ local function setupData()
                                 FontSize = 22,
                                 Width = 720,
                                 Color = Color.White,
-                                Font = "AlegreyaSansSCLight",
+                                Font = "P22UndergroundSCMedium",
                                 ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
                                 Justification = "Center"
                             },
@@ -194,7 +224,7 @@ local function setupData()
                                 FontSize = 22,
                                 Width = 720,
                                 Color = Color.BoonPatchCommon,
-                                Font = "AlegreyaSansSCLight",
+                                Font = "P22UndergroundSCMedium",
                                 ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
                                 Justification = "Center"
                             },
@@ -217,7 +247,7 @@ local function setupData()
                                 FontSize = 22,
                                 Width = 720,
                                 Color = Color.BoonPatchRare,
-                                Font = "AlegreyaSansSCLight",
+                                Font = "P22UndergroundSCMedium",
                                 ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
                                 Justification = "Center"
                             },
@@ -240,7 +270,7 @@ local function setupData()
                                 FontSize = 22,
                                 Width = 720,
                                 Color = Color.BoonPatchEpic,
-                                Font = "AlegreyaSansSCLight",
+                                Font = "P22UndergroundSCMedium",
                                 ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
                                 Justification = "Center"
                             },
@@ -263,7 +293,7 @@ local function setupData()
                                 FontSize = 22,
                                 Width = 720,
                                 Color = Color.BoonPatchHeroic,
-                                Font = "AlegreyaSansSCLight",
+                                Font = "P22UndergroundSCMedium",
                                 ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
                                 Justification = "Center"
                             },
@@ -346,7 +376,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -369,7 +399,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -392,7 +422,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -415,7 +445,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -438,7 +468,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -461,7 +491,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -484,7 +514,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -507,7 +537,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -530,7 +560,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -553,7 +583,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -576,7 +606,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -599,7 +629,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -623,7 +653,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -645,7 +675,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -667,7 +697,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -689,7 +719,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -712,7 +742,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -734,7 +764,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -756,7 +786,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -778,7 +808,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -801,7 +831,7 @@ local function setupData()
 								FontSize = 22,
 								Width = 720,
 								Color = Color.White,
-								Font = "AlegreyaSansSCLight",
+								Font = "P22UndergroundSCMedium",
 								ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
 								Justification = "Center"
 							},
@@ -1059,19 +1089,68 @@ function mod.PopulateBoonData (upgradeName)
     local godName = string.gsub(upgradeName, 'Upgrade', '')
     local index = 0
 
-    for k, v in pairs (LootSetData[godName][upgradeName].WeaponUpgrades) do
-        index = index + 1
-        mod.BoonData[upgradeName][index] = v
+    if LootSetData[godName] ~= nil and LootSetData[godName][upgradeName].WeaponUpgrades ~= nil then
+        for k, v in pairs (LootSetData[godName][upgradeName].WeaponUpgrades) do
+            index = index + 1
+            mod.BoonData[upgradeName][index] = v
+        end
     end
-    for k, v in pairs (LootSetData[godName][upgradeName].Traits) do
-        index = index + 1
-        mod.BoonData[upgradeName][index] = v
+
+    if LootSetData[godName] ~= nil and LootSetData[godName][upgradeName].Traits ~= nil then
+		for k, v in pairs (LootSetData[godName][upgradeName].Traits) do
+			index = index + 1
+			mod.BoonData[upgradeName][index] = v
+		end
     end
+
+    if mod.BoonData[upgradeName] == nil or IsEmpty(mod.BoonData[upgradeName]) then
+        if upgradeName == "SpellDrop" then
+            for k, v in pairs (QuestData.QuestDarkSorceries.CompleteGameStateRequirements[1].HasAll) do
+                index = index + 1
+                mod.BoonData[upgradeName][index] = v
+            end
+		elseif upgradeName == "WeaponUpgrade" then
+			local wp = GetEquippedWeapon()
+			for k, v in pairs (LootSetData.Loot[upgradeName].Traits) do
+				index = index + 1
+				local boon = TraitData[v]
+				if boon.RequiredWeapon == wp then
+					mod.BoonData[upgradeName][index] = v
+				end
+			end
+		elseif upgradeName == "Arachne" then
+			for k, v in pairs (PresetEventArgs.ArachneCostumeChoices.UpgradeOptions) do
+                index = index + 1
+                mod.BoonData[upgradeName][index] = v.ItemName
+            end
+		elseif upgradeName == "ArtemisUpgrade" then
+			for k, v in pairs (UnitSetData.NPC_Artemis.NPC_Artemis_Field_01.Traits) do
+                index = index + 1
+                mod.BoonData[upgradeName][index] = v
+            end
+        end
+    end
+
 end
 
 function mod.GetLootColor (upgradeName)
     local godName = string.gsub(upgradeName, 'Upgrade', '')
-    return LootSetData[godName][upgradeName].LootColor
+    local color = Color.Black
+    if PonyMenu.Config.ColorblindMode == true then
+        return color
+    end
+    if LootSetData[godName] ~= nil then
+        color = LootSetData[godName][upgradeName].LootColor
+    elseif upgradeName == "SpellDrop" then
+        color = LootSetData.Selene[upgradeName].LootColor
+    elseif upgradeName == "WeaponUpgrade" then
+        color = LootSetData.Loot[upgradeName].LootColor
+    elseif upgradeName == "Arachne" then
+        color = Color.ArachneVoice
+    elseif upgradeName == "ArtemisUpgrade" then
+        color = UnitSetData.NPC_Artemis.NPC_Artemis_Field_01.LootColor
+    end
+    return color
 end
 
 function mod.OpenBoonSelector(screen, button)
@@ -1082,12 +1161,13 @@ function mod.OpenBoonSelector(screen, button)
 
     screen = DeepCopyTable(ScreenData.BoonSelector)
     screen.Upgrade = button.ItemData.Name
+    local itemData = button.ItemData
 	local components = screen.Components
     local children = screen.ComponentData.Background.Children
-    local boons = mod.BoonData[button.ItemData.Name]
-    local lColor = mod.GetLootColor(button.ItemData.Name) or Color.White
+    local boons = mod.BoonData[itemData.Name]
+    local lColor = mod.GetLootColor(itemData.Name) or Color.White
     -- Boon buttons
-    mod.PopulateBoonData(button.ItemData.Name)
+    mod.PopulateBoonData(itemData.Name)
 
     for index, boon in ipairs (boons) do
         local purchaseButtonKey = "PurchaseButton"..index
@@ -1112,7 +1192,7 @@ function mod.OpenBoonSelector(screen, button)
                     FontSize = 22,
                     Width = 720,
                     Color = Color.DarkGray,
-                    Font = "AlegreyaSansSCLight",
+                    Font = "P22UndergroundSCMedium",
                     ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
                     Justification = "Center"
                 },
@@ -1126,12 +1206,13 @@ function mod.OpenBoonSelector(screen, button)
                 OffsetX = offsetX,
                 OffsetY = offsetY,
                 Text = boon,
+                Color = lColor,
                 TextArgs =
                 {
                     FontSize = 22,
                     Width = 720,
-                    Color = color,
-                    Font = "AlegreyaSansSCLight",
+                    Color = Color.White,
+                    Font = "P22UndergroundSCMedium",
                     ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
                     Justification = "Center"
                 },
@@ -1142,8 +1223,13 @@ function mod.OpenBoonSelector(screen, button)
             }
         end
     end
-
     --
+    if itemData.NoRarity then
+        table.remove(children.CommonButton)
+        table.remove(children.RareButton)
+        table.remove(children.EpicButton)
+        table.remove(children.HeroicButton)
+    end
 
     OnScreenOpened(screen)
 	CreateScreenFromData(screen, screen.ComponentData)
@@ -1192,7 +1278,7 @@ function mod.LockChoice(components, button)
 
 	components[purchaseButtonKeyLock] = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray", Scale = 0.3 })
 	CreateTextBox({ Id = components[purchaseButtonKeyLock].Id, Text = button.Boon,
-		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.DarkGray, Font = "AlegreyaSansSCLight",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.DarkGray, Font = "P22UndergroundSCMedium",
 		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
 	})
     if button.DuoScreen then
@@ -1259,13 +1345,13 @@ function mod.OpenResourceMenu(screen, button)
     components.ResourceTextbox = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray" })
 	Attach({ Id = components.ResourceTextbox.Id, DestinationId = components.Background.Id, OffsetX = -150, OffsetY = 250 })
 	CreateTextBox({ Id = components.ResourceTextbox.Id, Text = screen.Resource,
-		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = lColor, Font = "AlegreyaSansSCLight",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = lColor, Font = "P22UndergroundSCMedium",
 		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
 	})
 	components.ResourceAmountTextbox = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray" })
 	Attach({ Id = components.ResourceAmountTextbox.Id, DestinationId = components.Background.Id, OffsetX = 100, OffsetY = 250 })
 	CreateTextBox({ Id = components.ResourceAmountTextbox.Id, Text = screen.Amount,
-		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = lColor, Font = "AlegreyaSansSCLight",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = lColor, Font = "P22UndergroundSCMedium",
 		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
 	})
 
