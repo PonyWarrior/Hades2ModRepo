@@ -1,0 +1,5 @@
+Top Import config.lua
+Import main.lua
+
+To "Scripts/ResourceData.lua"
+Import Data/ResourceData.lua
