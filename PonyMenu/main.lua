@@ -1225,10 +1225,10 @@ function mod.OpenBoonSelector(screen, button)
     end
     --
     if itemData.NoRarity then
-        table.remove(children.CommonButton)
-        table.remove(children.RareButton)
-        table.remove(children.EpicButton)
-        table.remove(children.HeroicButton)
+		children.CommonButton = nil
+		children.RareButton = nil
+		children.EpicButton = nil
+		children.HeroicButton = nil
     end
 
     OnScreenOpened(screen)
