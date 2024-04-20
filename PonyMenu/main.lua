@@ -17,102 +17,108 @@ local mouseOverCommandItem, mouseOffCommandItem
 
 local function setupData()
 
-	mod.BoonData = {}
-	-- mod.BoonData.ZeusUpgrade = mod.MergeTables(LootSetData.Zeus.ZeusUpgrade.WeaponUpgrades, LootSetData.Zeus.ZeusUpgrade.Traits)
-	mod.BoonData.ZeusUpgrade = {}
-	mod.BoonData.PoseidonUpgrade = {}
-	mod.BoonData.AphroditeUpgrade = {}
-	mod.BoonData.ApolloUpgrade = {}
-	mod.BoonData.DemeterUpgrade = {}
-	mod.BoonData.HephaestusUpgrade = {}
-	mod.BoonData.HestiaUpgrade = {}
-	mod.BoonData.ArtemisUpgrade = {}
-    mod.BoonData.SpellDrop = {}
-    mod.BoonData.WeaponUpgrade = {}
-	mod.BoonData.Arachne = {}
-
-    mod.ChildForm = false
+	mod.BoonData = {
+		ZeusUpgrade = {},
+		PoseidonUpgrade = {},
+		AphroditeUpgrade = {},
+		ApolloUpgrade = {},
+		DemeterUpgrade = {},
+		HephaestusUpgrade = {},
+		HestiaUpgrade = {},
+		ArtemisUpgrade = {},
+		SpellDrop = {},
+		WeaponUpgrade = {},
+		Arachne = {},
+	}
 
 	mod.CommandData = {
 		{
 			Icon = "BoonSymbolZeusIcon",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "ZeusUpgrade",
 			Type = "Boon"
 		},
 		{
 			Icon = "BoonSymbolPoseidonIcon",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "PoseidonUpgrade",
 			Type = "Boon"
 		},
 		{
 			Icon = "BoonSymbolAphroditeIcon",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "AphroditeUpgrade",
 			Type = "Boon"
 		},
 		{
 			Icon = "BoonSymbolApolloIcon",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "ApolloUpgrade",
 			Type = "Boon"
 		},
 		{
 			Icon = "BoonSymbolDemeterIcon",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "DemeterUpgrade",
 			Type = "Boon"
 		},
 		{
 			Icon = "BoonSymbolHephaestusIcon",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "HephaestusUpgrade",
 			Type = "Boon"
 		},
 		{
 			Icon = "BoonDropHestiaPreview",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "HestiaUpgrade",
 			Type = "Boon"
 		},
 		{
 			Icon = "BoonSymbolArtemisIcon",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "ArtemisUpgrade",
 			Type = "Boon"
 		},
         {
 			Icon = "SpellDropPreview",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "SpellDrop",
 			Type = "Boon",
 			NoRarity = true
 		},
         {
 			Icon = "WeaponUpgradeSymbol",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "WeaponUpgrade",
 			Type = "Boon",
             NoRarity = true
 		},
 		{
 			Icon = "ArmorBoost",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "Arachne",
 			Type = "Boon",
 		},
 		{
 			Icon = "TrashButtonFlash",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "Clear all boons",
 			Description = "Removes all equipped boons.",
 			Type = "Command",
 			Function = mod.ClearAllBoons
 		},
 		{
+			Icon = "CharonPointsDrop",
+			IconScale = 0.6,
+			Name = "Boon Manager",
+			Description = "Opens the boon manager. Let's you manage your boons. You can delete and upgrade any boon you have.",
+			Type = "Command",
+			Function = mod.OpenBoonManager
+		},
+		{
 			IconPath = "GUI\\Screens\\Inventory\\Icon-Resources",
-			IconScale = 0.4,
+			IconScale = 0.6,
 			Name = "Resource Menu",
 			Description = "Spawn any resource in any amount.",
 			Type = "Command",
@@ -1136,7 +1142,7 @@ end
 function mod.GetLootColor (upgradeName)
     local godName = string.gsub(upgradeName, 'Upgrade', '')
     local color = Color.Black
-    if PonyMenu.Config.ColorblindMode == true then
+    if mod.Config.ColorblindMode == true then
         return color
     end
     if LootSetData[godName] ~= nil then
@@ -1150,6 +1156,19 @@ function mod.GetLootColor (upgradeName)
     elseif upgradeName == "ArtemisUpgrade" then
         color = UnitSetData.NPC_Artemis.NPC_Artemis_Field_01.LootColor
     end
+    return color
+end
+
+function mod.GetLootColorFromTrait (traitName)
+    local color = Color.Red
+    if mod.Config.ColorblindMode == true then
+        return color
+    end
+	for upgradeName, boonData in pairs(mod.BoonData) do
+		if ArrayContains(boonData, traitName) then
+			color = mod.GetLootColor(upgradeName)
+		end
+	end
     return color
 end
 
@@ -1167,7 +1186,6 @@ function mod.OpenBoonSelector(screen, button)
     local boons = mod.BoonData[itemData.Name]
     local lColor = mod.GetLootColor(itemData.Name) or Color.White
     -- Boon buttons
-    mod.PopulateBoonData(itemData.Name)
 
     for index, boon in ipairs (boons) do
         local purchaseButtonKey = "PurchaseButton"..index
@@ -1401,16 +1419,407 @@ function mod.ToggleChildForm(screen, button)
 
 end
 
--- ModUtil.Path.Wrap( "SetupHeroObject", function(baseFunc, room, applyLuaUpgrades)
---     if mod.ChildForm then
---         room.HeroUnitName = "PlayerMelFlashback"
---         room.HeroOverwrites = {
--- 			AttachedAnimationName = "LaurelCindersSpawner_Young",
--- 			Portrait = "Portrait_Mel_Child_01",
--- 		}
---     end
---     return baseFunc(room, applyLuaUpgrades)
--- end)
+function mod.OpenBoonManager(screen, button)
+    if IsScreenOpen("BoonSelector") then
+		return
+	end
+
+    screen = DeepCopyTable(ScreenData.BoonSelector)
+	screen.FirstPage = 0
+	screen.LastPage = 0
+	screen.CurrentPage = screen.FirstPage
+	local components = screen.Components
+	local children = screen.ComponentData.Background.Children
+	screen.ComponentData.Background.Text = "Boon Manager"
+
+    -- Display
+	children.CommonButton = nil
+	children.RareButton = nil
+	children.EpicButton = nil
+	children.HeroicButton = nil
+	children.SpawnButton = nil
+
+    OnScreenOpened(screen)
+	CreateScreenFromData(screen, screen.ComponentData)
+
+	local displayedTraits = {}
+	local index = 0
+	screen.BoonsList = {}
+	for i, boon in pairs(CurrentRun.Hero.Traits) do
+		if Contains(displayedTraits, boon.Name) or boon.Name == "GodModeTrait" then
+		else
+			if not mod.IsDummyWeaponTrait(boon.Name) then
+				table.insert(displayedTraits, boon.Name)
+				local rowOffset = 100
+				local columnOffset = 400
+				local boonsPerRow = 4
+				local rowsPerPage = 4
+				local rowIndex = math.floor(index/boonsPerRow)
+				local pageIndex = math.floor(rowIndex/rowsPerPage)
+				local offsetX = screen.RowStartX + columnOffset*(index % boonsPerRow)
+				local offsetY = screen.RowStartY + rowOffset*(rowIndex % rowsPerPage)
+				boon.Level = boon.StackNum or 1
+				index = index + 1
+				screen.LastPage = pageIndex
+				if screen.BoonsList[pageIndex] == nil then
+					screen.BoonsList[pageIndex] = {}
+				end
+				table.insert(screen.BoonsList[pageIndex],{
+					index = index,
+					boon = boon,
+					pageIndex = pageIndex,
+					offsetX = offsetX,
+					offsetY = offsetY,
+				})
+			end
+		end
+	end
+	-- print(ModUtil.ToString.Deep( displayedTraits, nil, nil, '\t' ))
+	mod.BoonManagerLoadPage(screen)
+	--Instructions
+	components.ModeDisplay = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray" })
+	Attach({ Id = components.ModeDisplay.Id, DestinationId = components.Background.Id, OffsetX = 0, OffsetY = 200 })
+	CreateTextBox({ Id = components.ModeDisplay.Id, Text = "Choose a mode",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
+		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+	})
+	CreateTextBox({ Id = components.ModeDisplay.Id, Text = "Click Level Mode or Rarity Mode again to switch Add(+) and Substract(-) submodes",
+	FontSize = 19, OffsetX = 0, OffsetY = - (ScreenCenterY * 0.95), Width = 840, Color = Color.SubTitle, Font = "CrimsonTextItalic",
+	ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 1}, Justification = "Center" })
+	--Mode Buttons
+	components.LevelModeButton = CreateScreenComponent({ Name = "ButtonDefault", Group = "Combat_Menu_TraitTray", Scale = 1.0})
+	components.LevelModeButton.OnPressedFunctionName = mod.ChangeBoonManagerMode
+	components.LevelModeButton.Mode = "Level"
+	components.LevelModeButton.Add = true
+	components.LevelModeButton.Substract = false
+	components.LevelModeButton.Icon = "(+)"
+	Attach({ Id = components.LevelModeButton.Id, DestinationId = components.Background.Id, OffsetX = -450, OffsetY = 300 })
+	CreateTextBox({ Id = components.LevelModeButton.Id, Text = "Level Mode(+)",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
+		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+	})
+	components.RarityModeButton = CreateScreenComponent({ Name = "ButtonDefault", Group = "Combat_Menu_TraitTray", Scale = 1.0 })
+	components.RarityModeButton.OnPressedFunctionName = mod.ChangeBoonManagerMode
+	components.RarityModeButton.Mode = "Rarity"
+	components.RarityModeButton.Add = true
+	components.RarityModeButton.Substract = false
+	components.RarityModeButton.Icon = "(+)"
+	Attach({ Id = components.RarityModeButton.Id, DestinationId = components.Background.Id, OffsetX = -150, OffsetY = 300 })
+	CreateTextBox({ Id = components.RarityModeButton.Id, Text = "Rarity Mode(+)",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
+		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+	})
+	components.DeleteModeButton = CreateScreenComponent({ Name = "ButtonDefault", Group = "Combat_Menu_TraitTray", Scale = 1.0 })
+	components.DeleteModeButton.OnPressedFunctionName = mod.ChangeBoonManagerMode
+	components.DeleteModeButton.Mode = "Delete"
+	Attach({ Id = components.DeleteModeButton.Id, DestinationId = components.Background.Id, OffsetX = 150, OffsetY = 300 })
+	CreateTextBox({ Id = components.DeleteModeButton.Id, Text = "Delete Mode",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
+		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+	})
+	components.AllModeButton = CreateScreenComponent({ Name = "ButtonDefault", Group = "Combat_Menu_TraitTray", Scale = 1.0 })
+	components.AllModeButton.OnPressedFunctionName = mod.ChangeBoonManagerMode
+	components.AllModeButton.Mode = "All"
+	Attach({ Id = components.AllModeButton.Id, DestinationId = components.Background.Id, OffsetX = 450, OffsetY = 300 })
+	CreateTextBox({ Id = components.AllModeButton.Id, Text = "All Mode : OFF",
+		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.BoonPatchEpic, Font = "P22UndergroundSCMedium",
+		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+	})
+	--End
+
+    SetColor({ Id = components.BackgroundTint.Id, Color = Color.Black })
+	SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.0, Duration = 0 })
+	SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.9, Duration = 0.3 })
+	wait(0.3)
+
+	SetConfigOption({ Name = "ExclusiveInteractGroup", Value = "Combat_Menu_TraitTray" })
+	screen.KeepOpen = true
+	HandleScreenInput( screen )
+end
+
+function mod.ChangeBoonManagerMode(screen, button)
+	if button.Mode == "All" then
+		if screen.AllMode == nil or not screen.AllMode then
+			screen.AllMode = true
+			ModifyTextBox({ Id = button.Id, Text = "All Mode : ON", Color = Color.BoonPatchHeroic })
+		else
+			screen.AllMode = false
+			ModifyTextBox({ Id = button.Id, Text = "All Mode : OFF", Color = Color.BoonPatchEpic })
+		end
+		return
+	end
+	if screen.LockedModeButton ~= nil and screen.LockedModeButton ~= button then
+		ModifyTextBox({ Id = screen.LockedModeButton.Id, Text = screen.LockedModeButton.Mode.." Mode"..(screen.LockedModeButton.Icon or "") })
+	elseif screen.LockedModeButton ~= nil and screen.LockedModeButton == button then
+		-- Switch add or subtract submode (does nothing for Delete mode)
+		if button.Add == false then
+			button.Substract = false
+			button.Add = true
+			button.Icon = "(+)"
+		else
+			button.Add = false
+			button.Substract = true
+			button.Icon = "(-)"
+		end
+	end
+	screen.Mode = button.Mode
+	screen.LockedModeButton = button
+	ModifyTextBox({ Id = button.Id, Text = ">>"..button.Mode.." Mode"..(button.Icon or "").."<<" })
+end
+
+function mod.HandleBoonManagerClick(screen, button)
+	if button.Boon == nil or screen.Mode == nil then
+		return
+	end
+	--All mode
+	if screen.AllMode ~= nil and screen.AllMode then
+		if screen.Mode == "Level" and screen.LockedModeButton.Add == true then
+			local upgradableTraits = {}
+			local upgradedTraits = {}
+			for i, traitData in pairs(CurrentRun.Hero.Traits) do
+				screen.Traits = CurrentRun.Hero.Traits
+				local numTraits = traitData.StackNum or 1
+				if numTraits < 100 and IsGodTrait(traitData.Name) and TraitData[traitData.Name] and IsGameStateEligible(CurrentRun, TraitData[traitData.Name]) and traitData.Rarity ~= "Legendary" and not mod.IsDummyWeaponTrait(traitData.Name) then
+					upgradableTraits[traitData.Name] = true
+				end
+			end
+			if not IsEmpty(upgradableTraits) then
+				for _, levelbutton in pairs(screen.Components) do
+					if not levelbutton.IsBackground and levelbutton.Boon ~= nil then
+						levelbutton.Boon.Level = levelbutton.Boon.Level + 1
+						ModifyTextBox({Id = levelbutton.Background.Id, Text = "Lv. "..levelbutton.Boon.Level})
+					end
+				end
+				while not IsEmpty(upgradableTraits) do
+					local name = RemoveRandomKey(upgradableTraits)
+					upgradedTraits[name] = true
+					local traitData = GetHeroTrait(name)
+					local stacks = GetTraitCount(name)
+					stacks = stacks + 1
+					IncreaseTraitLevel(traitData, stacks)
+				end
+			end
+			return
+		elseif screen.Mode == "Level" and screen.LockedModeButton.Substract == true then
+			local upgradableTraits = {}
+			local upgradedTraits = {}
+			for i, traitData in pairs(CurrentRun.Hero.Traits) do
+				screen.Traits = CurrentRun.Hero.Traits
+				local numTraits = traitData.StackNum or 1
+				if numTraits > 1 and IsGodTrait(traitData.Name) and TraitData[traitData.Name] and IsGameStateEligible(CurrentRun, TraitData[traitData.Name]) and traitData.Rarity ~= "Legendary" and not mod.IsDummyWeaponTrait(traitData.Name) then
+					upgradableTraits[traitData.Name] = true
+				end
+			end
+			if not IsEmpty(upgradableTraits) then
+				for _, levelbutton in pairs(screen.Components) do
+					if not levelbutton.IsBackground and levelbutton.Boon ~= nil then
+						levelbutton.Boon.Level = levelbutton.Boon.Level - 1
+						ModifyTextBox({Id = levelbutton.Background.Id, Text = "Lv. "..levelbutton.Boon.Level})
+					end
+				end
+				while not IsEmpty(upgradableTraits) do
+					local name = RemoveRandomKey(upgradableTraits)
+					upgradedTraits[name] = true
+					local traitData = GetHeroTrait(name)
+					local stacks = GetTraitCount(name)
+					stacks = stacks - 1
+					IncreaseTraitLevel(traitData, stacks)
+				end
+			end
+			return
+		elseif screen.Mode == "Rarity" and screen.LockedModeButton.Add == true then
+			local upgradableTraits = {}
+			local upgradedTraits = {}
+			for i, traitData in pairs( CurrentRun.Hero.Traits ) do
+				if IsGodTrait(traitData.Name, { ForShop = true }) and not mod.IsDummyWeaponTrait(traitData.Name) then
+					if TraitData[traitData.Name] and traitData.Rarity ~= nil and GetUpgradedRarity(traitData.Rarity) ~= nil and traitData.RarityLevels ~= nil and traitData.RarityLevels[GetUpgradedRarity(traitData.Rarity)] ~= nil then
+						if Contains(upgradableTraits, traitData) or traitData.Rarity == "Legendary" then
+						else
+							table.insert(upgradableTraits, traitData )
+						end
+					end
+				end
+			end
+			for _, colorButton in pairs(screen.Components) do
+				if colorButton.IsBackground == true and colorButton.Boon.Rarity ~= "Legendary" then
+					SetColor({Id = colorButton.Id, Color = Color.BoonPatchHeroic})
+				end
+			end
+			while not IsEmpty(upgradableTraits) do
+				local traitData = RemoveRandomValue(upgradableTraits)
+				upgradedTraits[traitData.Name] = true
+				RemoveTrait(CurrentRun.Hero, traitData.Name)
+				AddTraitToHero({ TraitData = GetProcessedTraitData({ Unit = CurrentRun.Hero, TraitName = traitData.Name, Rarity = "Heroic", StackNum = traitData.StackNum }) })
+			end
+			return
+		elseif screen.Mode == "Delete" then
+				mod.ClearAllBoons()
+				mod.CloseBoonSelector(screen)
+			return
+		end
+	else
+		--Individual mode
+		if screen.Mode == "Level" and screen.LockedModeButton.Add == true then
+			if GetTraitCount(CurrentRun.Hero, button.Boon.Name) < 100 and IsGodTrait(button.Boon.Name) and TraitData[button.Boon.Name] and IsGameStateEligible(CurrentRun, TraitData[button.Boon.Name]) and button.Boon.Rarity ~= "Legendary" and not mod.IsDummyWeaponTrait(button.Boon.Name) then
+				local traitData = GetHeroTrait(button.Boon.Name)
+				local stacks = GetTraitCount(CurrentRun.Hero, button.Boon.Name)
+				stacks = stacks + 1
+				IncreaseTraitLevel(traitData, stacks)
+				button.Boon.Level = button.Boon.Level + 1
+				ModifyTextBox({Id = button.Background.Id, Text = "Lv. "..button.Boon.Level})
+			end
+			return
+		elseif screen.Mode == "Level" and screen.LockedModeButton.Substract == true then
+			if GetTraitCount(CurrentRun.Hero, button.Boon) > 1 and IsGodTrait(button.Boon.Name) and TraitData[button.Boon.Name] and IsGameStateEligible(CurrentRun, TraitData[button.Boon.Name]) and button.Boon.Rarity ~= "Legendary" and not mod.IsDummyWeaponTrait(button.Boon.Name) then
+				local traitData = GetHeroTrait(button.Boon.Name)
+				local stacks = GetTraitCount(button.Boon.Name)
+				stacks = stacks - 1
+				IncreaseTraitLevel(traitData, stacks)
+				button.Boon.Level = button.Boon.Level - 1
+				ModifyTextBox({Id = button.Background.Id, Text = "Lv. "..button.Boon.Level})
+			end
+			return
+		elseif screen.Mode == "Rarity" and screen.LockedModeButton.Add == true then
+			if IsGodTrait(button.Boon.Name, { ForShop = true }) and not mod.IsDummyWeaponTrait(button.Boon.Name) then
+				if TraitData[button.Boon.Name] and button.Boon.Rarity ~= nil and GetUpgradedRarity(button.Boon.Rarity) ~= nil and button.Boon.RarityLevels[GetUpgradedRarity(button.Boon.Rarity)] ~= nil then
+					local count = GetTraitCount(CurrentRun.Hero, button.Boon)
+					button.Boon.Rarity = GetUpgradedRarity(button.Boon.Rarity)
+					SetColor({Id = button.Background.Id, Color = Color["BoonPatch"..button.Boon.Rarity]})
+					RemoveTrait(CurrentRun.Hero, button.Boon.Name)
+					AddTraitToHero({ TraitData = GetProcessedTraitData({ Unit = CurrentRun.Hero, TraitName = button.Boon.Name, Rarity = button.Boon.Rarity,  StackNum = count }) })
+				end
+			end
+			return
+		elseif screen.Mode == "Rarity" and screen.LockedModeButton.Substract == true then
+			if IsGodTrait(button.Boon.Name, { ForShop = true }) and not mod.IsDummyWeaponTrait(button.Boon.Name) then
+				if TraitData[button.Boon.Name] and button.Boon.Rarity ~= nil and GetDowngradedRarity(button.Boon.Rarity) ~= nil and button.Boon.RarityLevels[GetDowngradedRarity(button.Boon.Rarity)] ~= nil then
+					local count = GetTraitCount(CurrentRun.Hero, button.Boon)
+					button.Boon.Rarity = GetDowngradedRarity(button.Boon.Rarity)
+					SetColor({Id = button.Background.Id, Color = Color["BoonPatch"..button.Boon.Rarity]})
+					RemoveTrait(CurrentRun.Hero, button.Boon.Name)
+					AddTraitToHero({ TraitData = GetProcessedTraitData({ Unit = CurrentRun.Hero, TraitName = button.Boon.Name, Rarity = button.Boon.Rarity, StackNum = count }) })
+				end
+			end
+			return
+		elseif screen.Mode == "Delete" then
+			screen.BoonsList[screen.CurrentPage][button.Index] = nil
+			RemoveTrait(CurrentRun.Hero, button.Boon.Name)
+			Destroy({ Ids = { button.Id, button.Background.Id } })
+			return
+		end
+	end
+end
+
+function mod.BoonManagerChangePage(screen, button)
+	if button.Direction == "Left" and screen.CurrentPage > screen.FirstPage then
+		screen.CurrentPage = screen.CurrentPage - 1
+	elseif button.Direction == "Right" and screen.CurrentPage < screen.LastPage then
+		screen.CurrentPage = screen.CurrentPage + 1
+	else
+		return
+	end
+	local ids = {}
+	for i, component in pairs(screen.Components) do
+		if component.Boon ~= nil then
+			table.insert(ids, component.Id)
+		end
+	end
+	Destroy({ Ids = ids})
+	mod.BoonManagerLoadPage(screen)
+end
+
+function mod.BoonManagerLoadPage(screen)
+	mod.BoonManagerPageButtons(screen)
+    local displayedTraits = {}
+    local pageBoons = screen.BoonsList[screen.CurrentPage]
+    if pageBoons then
+		for i, boonData in pairs(pageBoons) do
+			if displayedTraits[boonData.boon.Name] or displayedTraits[boonData.boon] then
+				--Skip
+			else
+				local color = mod.GetLootColorFromTrait(boonData.boon.Name)
+				if boonData.boon.Rarity == nil then
+					boonData.boon.Rarity = "Common"
+				end
+				displayedTraits[boonData.boon.Name] = true
+				local purchaseButtonKeyBG = "PurchaseButtonBG"..boonData.index
+				screen.Components[purchaseButtonKeyBG] = CreateScreenComponent({ Name = "rectangle01", Group = "Combat_Menu_TraitTray", Scale = 0.38, ScaleX = 2.2 })
+				screen.Components[purchaseButtonKeyBG].IsBackground = true
+				screen.Components[purchaseButtonKeyBG].Boon = boonData.boon
+				CreateTextBox({ Id = screen.Components[purchaseButtonKeyBG].Id, Text = "Lv. "..boonData.boon.Level,
+					FontSize = 15, OffsetX = 95, OffsetY = 16, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
+					ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+				})
+				SetColor({ Id = screen.Components[purchaseButtonKeyBG].Id, Color = Color["BoonPatch"..boonData.boon.Rarity]})
+				local purchaseButtonKey = "PurchaseButton"..boonData.index
+				screen.Components[purchaseButtonKey] = CreateScreenComponent({ Name = "ButtonDefault", Group = "Combat_Menu_TraitTray", Scale = 1.2, ScaleX = 1.15, Color = color })
+				screen.Components[purchaseButtonKey].OnPressedFunctionName = mod.HandleBoonManagerClick
+				screen.Components[purchaseButtonKey].Boon = boonData.boon
+				screen.Components[purchaseButtonKey].Index = boonData.index
+				screen.Components[purchaseButtonKey].Background = screen.Components[purchaseButtonKeyBG]
+				Attach({ Id = screen.Components[purchaseButtonKey].Id, DestinationId = screen.Components.Background.Id, OffsetX = boonData.offsetX, OffsetY = boonData.offsetY })
+				Attach({ Id = screen.Components[purchaseButtonKeyBG].Id, DestinationId = screen.Components[purchaseButtonKey].Id })
+				CreateTextBox({ Id = screen.Components[purchaseButtonKey].Id, Text = boonData.boon.Name,
+				FontSize = 22, OffsetX = 0, OffsetY = -5, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
+				ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+				})
+			end
+		end
+  	end
+end
+
+function mod.BoonManagerPageButtons(screen)
+	local components = screen.Components
+	if components.LeftPageButton then
+		Destroy({ Ids = {components.LeftPageButton.Id}})
+	end
+	if components.RightPageButton then
+		Destroy({ Ids = {components.RightPageButton.Id}})
+	end
+	if screen.CurrentPage ~= screen.FirstPage then
+		components.LeftPageButton = CreateScreenComponent({ Name = "ButtonCodexLeft", Scale = 0.8, Sound = "/SFX/Menu Sounds/GeneralWhooshMENU", Group = "Combat_Menu_TraitTray" })
+		Attach({ Id = components.LeftPageButton.Id, DestinationId = components.Background.Id, OffsetX = -480, OffsetY = -350 })
+		components.LeftPageButton.OnPressedFunctionName = mod.BoonManagerChangePage
+		components.LeftPageButton.Direction = "Left"
+		components.LeftPageButton.ControlHotkeys = { "MenuLeft", "Left" }
+	end
+	if screen.CurrentPage ~= screen.LastPage then
+		components.RightPageButton = CreateScreenComponent({ Name = "ButtonCodexRight", Scale = 0.8, Sound = "/SFX/Menu Sounds/GeneralWhooshMENU", Group = "Combat_Menu_TraitTray" })
+		Attach({ Id = components.RightPageButton.Id, DestinationId = components.Background.Id, OffsetX = 720, OffsetY = -350 })
+		components.RightPageButton.OnPressedFunctionName = mod.BoonManagerChangePage
+		components.RightPageButton.Direction = "Right"
+		components.RightPageButton.ControlHotkeys = { "MenuRight", "Right" }
+	end
+end
+
+function mod.IsBoonTrait(traitName)
+	for i, lootset in pairs (LootSetData) do
+		for k, loot in pairs(lootset) do
+			if loot.Icon == "BoonSymbolHermes" and loot.TraitIndex[traitName] then
+				return true
+			elseif loot.Icon == "BoonSymbolChaos" and Contains(loot.PermanentTraits, traitName) then
+				return true
+			elseif loot.Icon == "BoonSymbolChaos" and Contains(loot.TemporaryTraits, traitName) then
+				return true
+			elseif loot.Icon == "WeaponUpgradeSymbol" and loot.TraitIndex[traitName] then
+				return true
+			end
+		end
+	end
+end
+
+function mod.IsDummyWeaponTrait(traitName)
+	if TraitSetData.DummyWeapons[traitName] then
+		return true
+	end
+	return false
+end
+
+ModUtil.LoadOnce(function ()
+    for key, value in pairs(mod.BoonData) do
+		mod.PopulateBoonData(key)
+	end
+end)
 
 mod.Internal = ModUtil.UpValues( function() 
 	return setupData, mouseOverCommandItem, mouseOffCommandItem
