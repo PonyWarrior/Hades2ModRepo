@@ -1116,14 +1116,14 @@ function mod.PopulateBoonData (upgradeName)
                 mod.BoonData[upgradeName][index] = v
             end
 		elseif upgradeName == "WeaponUpgrade" then
-			local wp = GetEquippedWeapon()
-			for k, v in pairs (LootSetData.Loot[upgradeName].Traits) do
+		local wp = GetEquippedWeapon()
+		for k, v in pairs (LootSetData.Loot[upgradeName].Traits) do
+			local boon = TraitData[v]
+			if boon.RequiredWeapon == GetEquippedWeapon() then
 				index = index + 1
-				local boon = TraitData[v]
-				if boon.RequiredWeapon == wp then
-					mod.BoonData[upgradeName][index] = v
-				end
+				mod.BoonData.WeaponUpgrade[index] = v
 			end
+		end
 		elseif upgradeName == "Arachne" then
 			for k, v in pairs (PresetEventArgs.ArachneCostumeChoices.UpgradeOptions) do
                 index = index + 1
@@ -1180,6 +1180,11 @@ function mod.OpenBoonSelector(screen, button)
 
     screen = DeepCopyTable(ScreenData.BoonSelector)
     screen.Upgrade = button.ItemData.Name
+
+	if screen.Upgrade == "WeaponUpgrade" then
+		mod.PopulateBoonData("WeaponUpgrade")
+	end
+
     local itemData = button.ItemData
 	local components = screen.Components
     local children = screen.ComponentData.Background.Children
@@ -1446,35 +1451,32 @@ function mod.OpenBoonManager(screen, button)
 	local index = 0
 	screen.BoonsList = {}
 	for i, boon in pairs(CurrentRun.Hero.Traits) do
-		if Contains(displayedTraits, boon.Name) or boon.Name == "GodModeTrait" then
+		if Contains(displayedTraits, boon.Name) or boon.Name == "GodModeTrait" or mod.IsDummyWeaponTrait(boon.Name)  then
 		else
-			if not mod.IsDummyWeaponTrait(boon.Name) then
-				table.insert(displayedTraits, boon.Name)
-				local rowOffset = 100
-				local columnOffset = 400
-				local boonsPerRow = 4
-				local rowsPerPage = 4
-				local rowIndex = math.floor(index/boonsPerRow)
-				local pageIndex = math.floor(rowIndex/rowsPerPage)
-				local offsetX = screen.RowStartX + columnOffset*(index % boonsPerRow)
-				local offsetY = screen.RowStartY + rowOffset*(rowIndex % rowsPerPage)
-				boon.Level = boon.StackNum or 1
-				index = index + 1
-				screen.LastPage = pageIndex
-				if screen.BoonsList[pageIndex] == nil then
-					screen.BoonsList[pageIndex] = {}
-				end
-				table.insert(screen.BoonsList[pageIndex],{
-					index = index,
-					boon = boon,
-					pageIndex = pageIndex,
-					offsetX = offsetX,
-					offsetY = offsetY,
-				})
+			table.insert(displayedTraits, boon.Name)
+			local rowOffset = 100
+			local columnOffset = 400
+			local boonsPerRow = 4
+			local rowsPerPage = 4
+			local rowIndex = math.floor(index/boonsPerRow)
+			local pageIndex = math.floor(rowIndex/rowsPerPage)
+			local offsetX = screen.RowStartX + columnOffset*(index % boonsPerRow)
+			local offsetY = screen.RowStartY + rowOffset*(rowIndex % rowsPerPage)
+			boon.Level = boon.StackNum or 1
+			index = index + 1
+			screen.LastPage = pageIndex
+			if screen.BoonsList[pageIndex] == nil then
+				screen.BoonsList[pageIndex] = {}
 			end
+			table.insert(screen.BoonsList[pageIndex],{
+				index = index,
+				boon = boon,
+				pageIndex = pageIndex,
+				offsetX = offsetX,
+				offsetY = offsetY,
+			})
 		end
 	end
-	-- print(ModUtil.ToString.Deep( displayedTraits, nil, nil, '\t' ))
 	mod.BoonManagerLoadPage(screen)
 	--Instructions
 	components.ModeDisplay = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray" })
