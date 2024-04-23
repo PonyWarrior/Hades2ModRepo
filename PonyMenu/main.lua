@@ -1182,6 +1182,7 @@ function mod.OpenBoonSelector(screen, button)
     screen.Upgrade = button.ItemData.Name
 
 	if screen.Upgrade == "WeaponUpgrade" then
+		mod.BoonData.WeaponUpgrade = {}
 		mod.PopulateBoonData("WeaponUpgrade")
 	end
 
