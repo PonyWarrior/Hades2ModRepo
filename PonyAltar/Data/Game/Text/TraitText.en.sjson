@@ -1,0 +1,6 @@
+Texts = [
+    "_search", [
+        { Name = "ForceZeusBoonKeepsake" }
+        { Description = "While you have Primed Magick, {#ManaFormat}{$TooltipData.ExtractData.ManaDelta:P}{#Prev}{!Icons.Mana}" }
+    ]
+]
