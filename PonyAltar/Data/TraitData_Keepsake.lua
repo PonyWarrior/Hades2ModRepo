@@ -148,6 +148,56 @@ TraitSetData.Keepsakes = {
 		  },
 		},
 	},
+	ForceApolloBoonKeepsake =
+	{
+		InheritFrom = { "BaseBoonUpgradeKeepsake" },
+		Icon = "Keepsake_15",
+		EquipSound = "/SFX/Menu Sounds/KeepsakeDionysusCup",
+		InRackTitle = "ForceApolloBoonKeepsake_Rack",
+		PropertyChanges = {
+			{
+				WeaponName = "WeaponBlink",
+				EffectName = "RushWeaponInvulnerable",
+				EffectProperty = "DurationFrames",
+				ChangeValue = { BaseValue = 10},
+				ChangeType = "Multiply",
+				ExcludeLinked = true,
+			},
+			{
+				WeaponName = "WeaponBlink",
+				EffectName = "RushWeaponInvulnerableCharge",
+				EffectProperty = "DurationFrames",
+				ChangeValue = { BaseValue = 10},
+				ChangeType = "Multiply",
+				ExcludeLinked = true,
+			},
+		},
+		ExtractValues =
+		{
+
+		},
+		EquipVoiceLines =
+		{
+			{
+				PreLineWait = 0.3,
+				BreakIfPlayed = true,
+				SuccessiveChanceToPlay = 0.2,
+				Cooldowns =
+				{
+					{ Name = "MelinoeAnyQuipSpeech" },
+				},
+
+				{ Cue = "/VO/Melinoe_3193", Text = "The Hope." },
+			},
+			[2] = GlobalVoiceLines.AwardSelectedVoiceLines,
+		},
+		SignOffData =
+		{
+		  {
+			Text = "SignoffApollo",
+		  },
+		},
+	},
 }
 
 
