@@ -5,4 +5,4 @@ To Scripts/TraitData_Keepsake.lua
 Import Data/TraitData_Keepsake.lua
 
 To Game/Text/en/TraitText.en.sjson
-Import Data/Game/Text/TraitText.en.sjson
+SJSON Data/Game/Text/TraitText.en.sjson

@@ -1,6 +1,14 @@
-Texts = [
-    "_search", [
-        { Name = "ForceZeusBoonKeepsake" }
-        { Description = "While you have Primed Magick, {#ManaFormat}{$TooltipData.ExtractData.ManaDelta:P}{#Prev}{!Icons.Mana}" }
+{
+    Texts = [
+        "_search", [
+            { Id = "ForceZeusBoonKeepsake" }
+            { Description = "While you have {$Keywords.ReserveMana} Magick{!Icons.Mana}, your {$Keywords.Omega} use {#ManaFormat}{$TooltipData.ExtractData.ManaDelta:F}{#Prev}  less Magick{!Icons.Mana}." }
+            { Id = "ForceZeusBoonKeepsake_Inactive" }
+            { Description = "While you have {$Keywords.ReserveMana} Magick{!Icons.Mana}, your {$Keywords.Omega} use {#ManaFormat}{$TooltipData.ExtractData.ManaDelta:F}{#Prev}  less Magick{!Icons.Mana}." }
+            { Id = "ForcePoseidonBoonKeepsake" }
+            { Description = "Slain enemies drop {#MoneyFormat}+{$TooltipData.ExtractData.TooltipHeal:F} {!Icons.Currency}{#Prev}." }
+            { Id = "ForcePoseidonBoonKeepsake_Inactive" }
+            { Description = "Slain enemies drop {#MoneyFormat}+{$TooltipData.ExtractData.TooltipHeal:F} {!Icons.Currency}{#Prev}." }
+        ]
     ]
-]
+}

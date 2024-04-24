@@ -278,4 +278,13 @@ ModUtil.Path.Override( "GetManaCost", function (weaponData, useRequiredMana, arg
 	end
 	
 	return round(manaCost)
-end)
+end, mod)
+
+ModUtil.Path.Context.Wrap("CheckMoneyDrop", function()
+    ModUtil.Path.Wrap("GetTotalHeroTraitValue", function(base, a, ...)
+        if a == "KillMoneyMultiplier" then
+          return base(a, ...)
+        end
+        return base(a, ...) + GetTotalHeroTraitValue("KillMoneyMultiplier")
+    end, mod)
+end, mod)

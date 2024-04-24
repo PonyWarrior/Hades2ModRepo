@@ -111,6 +111,43 @@ TraitSetData.Keepsakes = {
 		  },
 		},
 	},
+    ForcePoseidonBoonKeepsake =
+	{
+		InheritFrom = { "BaseBoonUpgradeKeepsake" },
+		Icon = "Keepsake_14",
+		EquipSound = "/SFX/Menu Sounds/KeepsakePoseidonShell",
+		InRackTitle = "ForcePoseidonBoonKeepsake_Rack",
+		KillMoneyMultiplier = { BaseValue = 1 },
+		ExtractValues =
+		{
+			{
+				Key = "KillMoneyMultiplier",
+				ExtractAs = "TooltipHeal",
+				Format = "Percent"
+			},
+		},
+		EquipVoiceLines =
+		{
+			{
+				PreLineWait = 0.3,
+				BreakIfPlayed = true,
+				SuccessiveChanceToPlay = 0.2,
+				Cooldowns =
+				{
+					{ Name = "MelinoeAnyQuipSpeech" },
+				},
+
+				{ Cue = "/VO/Melinoe_3192", Text = "The Sea." },
+			},
+			[2] = GlobalVoiceLines.AwardSelectedVoiceLines,
+		},
+		SignOffData =
+		{
+		  {
+			Text = "SignoffPoseidon",
+		  },
+		},
+	},
 }
 
 
