@@ -239,6 +239,25 @@ TraitSetData.Keepsakes = {
 				SkipAutoExtract = true,
 			},
 		},
+		RarityLevels =
+		{
+			Common =
+			{
+				Multiplier = 1.0,
+			},
+			Rare =
+			{
+				Multiplier = 1.05,
+			},
+			Epic =
+			{
+				Multiplier = 1.1,
+			},
+			Heroic =
+			{
+				Multiplier = 1.1,
+			}
+		},
 		EquipVoiceLines =
 		{
 			{
@@ -258,6 +277,50 @@ TraitSetData.Keepsakes = {
 		{
 		  {
 			Text = "SignoffHestia",
+		  },
+		},
+	},
+	ForceHephaestusBoonKeepsake =
+	{
+		InheritFrom = { "BaseBoonUpgradeKeepsake" },
+		Icon = "Keepsake_17",
+		EquipSound = "/SFX/Menu Sounds/KeepsakeZeusRing",
+		InRackTitle = "ForceHephaestusBoonKeepsake_Rack",
+		TooltipDamage = { BaseValue = 25 },
+		AddOutgoingDamageModifiers = {
+			ArmoredDamageMultiplier =
+			{
+				BaseValue = 0.25,
+				SourceIsMultiplier = true,
+			},
+			ValidWeapons = WeaponSets.HeroAllWeapons,
+		},
+		ExtractValues = 
+		{
+			{
+				Key = "TooltipDamage",
+				ExtractAs = "TooltipDamage",
+			},
+		},
+		EquipVoiceLines =
+		{
+			{
+				PreLineWait = 0.3,
+				BreakIfPlayed = true,
+				SuccessiveChanceToPlay = 0.2,
+				Cooldowns =
+				{
+					{ Name = "MelinoeAnyQuipSpeech" },
+				},
+
+				{ Cue = "/VO/Melinoe_3196", Text = "The Shard." },
+			},
+			[2] = GlobalVoiceLines.AwardSelectedVoiceLines,
+		},
+		SignOffData =
+		{
+		  {
+			Text = "SignoffHephaestus",
 		  },
 		},
 	},

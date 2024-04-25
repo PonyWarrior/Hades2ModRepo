@@ -288,3 +288,21 @@ ModUtil.Path.Context.Wrap("CheckMoneyDrop", function()
         return base(a, ...) + GetTotalHeroTraitValue("KillMoneyMultiplier")
     end, mod)
 end, mod)
+
+ModUtil.Path.Context.Wrap("Damage", function()
+    ModUtil.Path.Wrap("CalculateDamageMultipliers", function(base, a, ...)
+        if a ~= nil and a == CurrentRun.Hero and HeroHasTrait("ForceHephaestusBoonKeepsake") and CurrentRun.Hero.HealthBuffer ~= nil and CurrentRun.Hero.HealthBuffer > 0 then
+            local damageMult = 0
+            for i, modifierData in pairs(a.OutgoingDamageModifiers) do
+                if modifierData.ArmoredDamageMultiplier then
+                    damageMult = (modifierData.ArmoredDamageMultiplier * CurrentRun.Hero.HealthBuffer) /100
+                    if damageMult > 0.3 then
+                        damageMult = 0.3
+                    end
+                end
+            end
+          return base(a, ...) + damageMult
+        end
+        return base(a, ...)
+    end, mod)
+end, mod)
