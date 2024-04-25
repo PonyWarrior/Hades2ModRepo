@@ -148,56 +148,80 @@ TraitSetData.Keepsakes = {
 		  },
 		},
 	},
-	ForceApolloBoonKeepsake =
-	{
-		InheritFrom = { "BaseBoonUpgradeKeepsake" },
-		Icon = "Keepsake_15",
-		EquipSound = "/SFX/Menu Sounds/KeepsakeDionysusCup",
-		InRackTitle = "ForceApolloBoonKeepsake_Rack",
-		PropertyChanges = {
+    ForceApolloBoonKeepsake =
+    {
+        InheritFrom = { "BaseBoonUpgradeKeepsake" },
+        Icon = "Keepsake_15",
+        EquipSound = "/SFX/Menu Sounds/KeepsakeDionysusCup",
+        InRackTitle = "ForceApolloBoonKeepsake_Rack",
+		TooltipMultiplier = { BaseValue = 1.2 },
+        PropertyChanges = {
+            {
+                WeaponName = "WeaponBlink",
+                EffectName = "RushWeaponInvulnerable",
+                EffectProperty = "Duration",
+                BaseValue = 1.2,
+                ChangeType = "Multiply",
+                ExcludeLinked = true,
+            },
+            {
+                WeaponName = "WeaponBlink",
+                EffectName = "RushWeaponInvulnerableCharge",
+                EffectProperty = "Duration",
+                BaseValue = 1.2,
+                ChangeType = "Multiply",
+                ExcludeLinked = true,
+            },
+        },
+        ExtractValues =
+        {
 			{
-				WeaponName = "WeaponBlink",
-				EffectName = "RushWeaponInvulnerable",
-				EffectProperty = "DurationFrames",
-				ChangeValue = { BaseValue = 10},
-				ChangeType = "Multiply",
-				ExcludeLinked = true,
+				Key = "TooltipMultiplier",
+				ExtractAs = "TooltipMultiplier",
+				Format = "PercentDelta",
 			},
-			{
-				WeaponName = "WeaponBlink",
-				EffectName = "RushWeaponInvulnerableCharge",
-				EffectProperty = "DurationFrames",
-				ChangeValue = { BaseValue = 10},
-				ChangeType = "Multiply",
-				ExcludeLinked = true,
-			},
-		},
-		ExtractValues =
+        },
+		RarityLevels =
 		{
+			Common =
+			{
+				Multiplier = 1.0,
+			},
+			Rare =
+			{
+				Multiplier = 1.125,
+			},
+			Epic =
+			{
+				Multiplier = 1.25,
+			},
+			Heroic =
+			{
+				Multiplier = 1.25,
+			}
+		},
+        EquipVoiceLines =
+        {
+            {
+                PreLineWait = 0.3,
+                BreakIfPlayed = true,
+                SuccessiveChanceToPlay = 0.2,
+                Cooldowns =
+                {
+                    { Name = "MelinoeAnyQuipSpeech" },
+                },
 
-		},
-		EquipVoiceLines =
-		{
-			{
-				PreLineWait = 0.3,
-				BreakIfPlayed = true,
-				SuccessiveChanceToPlay = 0.2,
-				Cooldowns =
-				{
-					{ Name = "MelinoeAnyQuipSpeech" },
-				},
-
-				{ Cue = "/VO/Melinoe_3193", Text = "The Hope." },
-			},
-			[2] = GlobalVoiceLines.AwardSelectedVoiceLines,
-		},
-		SignOffData =
-		{
-		  {
-			Text = "SignoffApollo",
-		  },
-		},
-	},
+                { Cue = "/VO/Melinoe_3193", Text = "The Hope." },
+            },
+            [2] = GlobalVoiceLines.AwardSelectedVoiceLines,
+        },
+        SignOffData =
+        {
+          {
+            Text = "SignoffApollo",
+          },
+        },
+    },
 	ForceHestiaBoonKeepsake =
 	{
 		InheritFrom = { "BaseBoonUpgradeKeepsake" },

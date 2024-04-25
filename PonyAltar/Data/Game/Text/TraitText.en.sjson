@@ -9,6 +9,10 @@
             { Description = "Slain enemies drop {#MoneyFormatBold}+{$TooltipData.ExtractData.TooltipHeal:F} {!Icons.Currency}{#Prev}." }
             { Id = "ForcePoseidonBoonKeepsake_Inactive" }
             { Description = "Slain enemies drop {#MoneyFormatBold}+{$TooltipData.ExtractData.TooltipHeal:F} {!Icons.Currency}{#Prev}." }
+            { Id = "ForceApolloBoonKeepsake" }
+            { Description = "Extends the invulnerability period of your {$Keywords.Dash} by {#AltUpgradeFormat}{$TooltipData.ExtractData.TooltipMultiplier:F}{#Prev}." }
+            { Id = "ForceApolloBoonKeepsake_Inactive" }
+            { Description = "Extends the invulnerability period of your {$Keywords.Dash} by {#AltUpgradeFormat}{$TooltipData.ExtractData.TooltipMultiplier:F}{#Prev}." }
             { Id = "ForceHestiaBoonKeepsake" }
             { Description = "All your damage is increased by {#AltUpgradeFormat}{$TooltipData.ExtractData.TooltipDamage:F} {#Prev}, but you have {#PenaltyFormat}{$TooltipData.ExtractData.HealthPenalty:P}{#Prev}{!Icons.HealthDown}." }
             { Id = "ForceHestiaBoonKeepsake_Inactive" }
