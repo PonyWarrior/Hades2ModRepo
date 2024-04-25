@@ -198,6 +198,69 @@ TraitSetData.Keepsakes = {
 		  },
 		},
 	},
+	ForceHestiaBoonKeepsake =
+	{
+		InheritFrom = { "BaseBoonUpgradeKeepsake" },
+		Icon = "Keepsake_18",
+		EquipSound = "/SFX/Menu Sounds/KeepsakeAthenaOwl",
+		InRackTitle = "ForceHestiaBoonKeepsake_Rack",
+		MaxHealthMultiplier = 0.80,
+		AddOutgoingDamageModifiers =
+		{
+			ValidWeapons = WeaponSets.HeroAllWeapons,
+			ValidWeaponMultiplier = {BaseValue = 1.05},
+			ReportValues =
+			{
+				ReportedDamageBonus = "ValidWeaponMultiplier",
+			}
+		},
+		PropertyChanges =
+		{
+			{
+				LuaProperty = "MaxHealth",
+				ChangeValue = 0.80,
+				ChangeType = "Multiply",
+				SourceIsMultiplier = true,
+				MaintainDelta = true,
+				ReportValues = { ReportedHealthPenalty = "ChangeValue"}
+			},
+		},
+		ExtractValues =
+		{
+			{
+				Key = "ReportedDamageBonus",
+				ExtractAs = "TooltipDamage",
+				Format = "PercentDelta",
+			},
+			{
+				Key = "ReportedHealthPenalty",
+				ExtractAs = "HealthPenalty",
+				Format = "PercentDelta",
+				SkipAutoExtract = true,
+			},
+		},
+		EquipVoiceLines =
+		{
+			{
+				PreLineWait = 0.3,
+				BreakIfPlayed = true,
+				SuccessiveChanceToPlay = 0.2,
+				Cooldowns =
+				{
+					{ Name = "MelinoeAnyQuipSpeech" },
+				},
+
+				{ Cue = "/VO/Melinoe_3197", Text = "The Ember." },
+			},
+			[2] = GlobalVoiceLines.AwardSelectedVoiceLines,
+		},
+		SignOffData =
+		{
+		  {
+			Text = "SignoffHestia",
+		  },
+		},
+	},
 }
 
 
