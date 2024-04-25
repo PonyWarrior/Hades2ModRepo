@@ -21,6 +21,10 @@
             { Description = "Each point of {!Icons.ArmorTotal}you have increases your damage by {#AltUpgradeFormat}0.{$TooltipData.ExtractData.TooltipDamage:F} {#Prev}, up to {#AltUpgradeFormat}30%{#Prev}." }
             { Id = "ForceHephaestusBoonKeepsake_Inactive" }
             { Description = "Each point of {!Icons.ArmorTotal}you have increases your damage by {#AltUpgradeFormat}0.{$TooltipData.ExtractData.TooltipDamage:F} {#Prev}, up to {#AltUpgradeFormat}30%{#Prev}." }
+            { Id = "ForceAphroditeBoonKeepsake" }
+            { Description = "Increases your chances to receive a {$Keywords.GodBoon} of higher {$Keywords.Rarity}. {#RareFormat}Rare {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.RareBonus:P} {#Prev}and {#EpicFormat}Epic {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.EpicBonus:P} {#Prev}." }
+            { Id = "ForceAphroditeBoonKeepsake_Inactive" }
+            { Description = "Increases your chances to receive a {$Keywords.GodBoon} of higher {$Keywords.Rarity}. {#RareFormat}Rare {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.RareBonus:P} {#Prev}and {#EpicFormat}Epic {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.EpicBonus:P} {#Prev}." }
         ]
     ]
 }

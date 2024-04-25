@@ -348,6 +348,108 @@ TraitSetData.Keepsakes = {
 		  },
 		},
 	},
+	ForceDemeterBoonKeepsake =
+	{
+		InheritFrom = { "BaseBoonUpgradeKeepsake" },
+		Icon = "Keepsake_14",
+		EquipSound = "/SFX/Menu Sounds/KeepsakeDemeterHorn",
+		InRackTitle = "ForceDemeterBoonKeepsake_Rack",
+		ExtractValues =
+		{
+
+		},
+		EquipVoiceLines =
+		{
+			{
+				PreLineWait = 0.3,
+				BreakIfPlayed = true,
+				SuccessiveChanceToPlay = 0.2,
+				Cooldowns =
+				{
+					{ Name = "MelinoeAnyQuipSpeech" },
+				},
+
+				{ Cue = "/VO/Melinoe_3194", Text = "The Sheaf." },
+			},
+			{
+				PreLineWait = 0.3,
+				BreakIfPlayed = true,
+				RandomRemaining = true,
+				ChanceToPlay = 0.25,
+				Source = { LineHistoryName = "NPC_Demeter_01", SubtitleColor = Color.DemeterVoice },
+				GameStateRequirements =
+				{
+					{
+						PathTrue = { "GameState", "TextLinesRecord", "DemeterGift03" },
+					},
+				},
+				Cooldowns =
+				{
+					{ Name = "KeepsakeGiverSpeechPlayedRecently", Time = 90 },
+				},
+				{ Cue = "/VO/DemeterKeepsake_0153", Text = "Granddaughter." },
+				{ Cue = "/VO/DemeterKeepsake_0155", Text = "Melinoë." },
+			},
+			[3] = GlobalVoiceLines.AwardSelectedVoiceLines,
+		},
+		SignOffData =
+		{
+			{
+				Text = "SignoffDemeter",
+			},
+		},
+	},
+	ForceAphroditeBoonKeepsake =
+	{
+		InheritFrom = { "BaseBoonUpgradeKeepsake" },
+		Icon = "Keepsake_16",
+		EquipSound = "/SFX/Menu Sounds/KeepsakeAphroditeRose",
+		InRackTitle = "ForceAphroditeBoonKeepsake_Rack",
+		RarityBonus =
+		{
+			Rare = { BaseValue = 0.05 },
+			Epic = { BaseValue = 0.03 },
+			ReportValues = { 
+				ReportedRareRarityBonus = "Rare",
+				ReportedEpicRarityBonus = "Epic",
+			}
+
+		},
+		ExtractValues =
+		{
+			{
+				Key = "ReportedRareRarityBonus",
+				ExtractAs = "RareBonus",
+				Format = "Percent",
+			},
+			{
+				Key = "ReportedEpicRarityBonus",
+				ExtractAs = "EpicBonus",
+				Format = "Percent",
+			},
+		},
+		EquipVoiceLines =
+		{
+			{
+				PreLineWait = 0.3,
+				BreakIfPlayed = true,
+				SuccessiveChanceToPlay = 0.2,
+				Cooldowns =
+				{
+					{ Name = "MelinoeAnyQuipSpeech" },
+				},
+
+				{ Cue = "/VO/Melinoe_3195", Text = "The Mirror." },
+			},
+			[2] = GlobalVoiceLines.AwardSelectedVoiceLines,
+		},
+		SignOffData =
+		{
+		  {
+			Text = "SignoffAphrodite",
+		  },
+		},
+	},
 }
 
 
