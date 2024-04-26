@@ -163,7 +163,6 @@ function mod.OpenAltarMenu()
             SetAnimation({ DestinationId = components[key].Id, Name = Portraits[index], Scale = 0.4 })
             Move({ Ids = { components[key].Id, components[buttonKey].Id }, OffsetX = screen.RowStartX, OffsetY = 500, Duration = index / 10 })
 
-            -- wait(0.1)
             screen.RowStartX = screen.RowStartX + screen.IncrementX
         end
     end
@@ -213,7 +212,6 @@ end
 
 function mod.EquipAltarBoon()
     if GameState.SelectedGod ~= nil then
-        -- local altarTrait = DeepCopyTable(TraitData.AltarBoon)
         local altarTrait = GetProcessedTraitData({ Unit = CurrentRun.Hero, TraitName = "AltarBoon" })
         altarTrait.ForceBoonName = GameState.SelectedGod
         altarTrait.RarityUpgradeData.LootName = GameState.SelectedGod
@@ -277,9 +275,14 @@ ModUtil.Path.Override( "GetManaCost", function (weaponData, useRequiredMana, arg
 			if data.ManaCostMultiplier then
 				manaMultiplier = manaMultiplier * data.ManaCostMultiplier
 			end
+            --MOD START
             if data.ManaCostMultiplierWhilePrimed and CurrentRun.Hero.ReserveManaSources then
 				manaMultiplier = manaMultiplier * data.ManaCostMultiplierWhilePrimed
             end
+            if data.ManaCostMultiplierWhileLowHealth and (CurrentRun.Hero.Health / CurrentRun.Hero.MaxHealth) <= data.LowHealthThreshold  then
+				manaMultiplier = manaMultiplier * data.ManaCostMultiplierWhileLowHealth
+            end
+            --MOD END
 		end
 	end
 	manaCost = manaCost * manaMultiplier

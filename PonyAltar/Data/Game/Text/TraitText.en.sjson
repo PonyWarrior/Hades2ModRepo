@@ -25,6 +25,10 @@
             { Description = "Increases your chances to receive a {$Keywords.GodBoon} of higher {$Keywords.Rarity}. {#RareFormat}Rare {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.RareBonus:P} {#Prev}and {#EpicFormat}Epic {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.EpicBonus:P} {#Prev}." }
             { Id = "ForceAphroditeBoonKeepsake_Inactive" }
             { Description = "Increases your chances to receive a {$Keywords.GodBoon} of higher {$Keywords.Rarity}. {#RareFormat}Rare {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.RareBonus:P} {#Prev}and {#EpicFormat}Epic {#Prev}{#AltUpgradeFormat}{$TooltipData.ExtractData.EpicBonus:P} {#Prev}." }
+            { Id = "ForceDemeterBoonKeepsake" }
+            { Description = "While under {#BoldFormatGraft}{$TooltipData.ExtractData.Health:F}{#Prev}{!Icons.Health}, your {$Keywords.Omega} use {#ManaFormat}{$TooltipData.ExtractData.ManaDelta:F} {#Prev}less Magick{!Icons.Mana}." }
+            { Id = "ForceDemeterBoonKeepsake_Inactive" }
+            { Description = "While under {#BoldFormatGraft}{$TooltipData.ExtractData.Health:F}{#Prev}{!Icons.Health}, your {$Keywords.Omega} use {#ManaFormat}{$TooltipData.ExtractData.ManaDelta:F} {#Prev}less Magick{!Icons.Mana}." }
         ]
     ]
 }

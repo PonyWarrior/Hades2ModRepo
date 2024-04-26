@@ -354,9 +354,47 @@ TraitSetData.Keepsakes = {
 		Icon = "Keepsake_14",
 		EquipSound = "/SFX/Menu Sounds/KeepsakeDemeterHorn",
 		InRackTitle = "ForceDemeterBoonKeepsake_Rack",
+		ManaCostModifiers =
+		{
+			LowHealthThreshold = 0.3,
+			WeaponNames = WeaponSets.HeroAllWeapons,
+			ManaCostMultiplierWhileLowHealth = { BaseValue = 0.6} ,
+			ReportValues = { 
+				ReportedManaCost = "ManaCostMultiplierWhileLowHealth",
+				ReportedThreshold = "LowHealthThreshold",
+			 }
+		},
 		ExtractValues =
 		{
-
+			{
+				Key = "ReportedManaCost",
+				ExtractAs = "ManaDelta",
+				Format = "PercentDelta",
+			},
+			{
+				Key = "ReportedThreshold",
+				ExtractAs = "Health",
+				Format = "Percent",
+			},
+		},
+		RarityLevels =
+		{
+			Common =
+			{
+				Multiplier = 1.0,
+			},
+			Rare =
+			{
+				Multiplier = 0.67,
+			},
+			Epic =
+			{
+				Multiplier = 0.33,
+			},
+			Heroic =
+			{
+				Multiplier = 0.33,
+			}
 		},
 		EquipVoiceLines =
 		{
