@@ -7,7 +7,7 @@ table.insert(HubRoomData.Hub_PreRun.StartUnthreadedEvents,
     FunctionName = "PonyAltar.SpawnAltar"
 })
 
-local Portraits = {
+ mod.Data.Portraits = {
     "Codex_Portrait_Zeus",
     "Codex_Portrait_Poseidon",
     "Codex_Portrait_Apollo",
@@ -22,7 +22,7 @@ ModUtil.Table.Merge(ScreenData, {
         Components = {},
         OpenSound = "/SFX/Menu Sounds/HadesLocationTextAppear",
         Name = "PonyAltar",
-        RowStartX = 125,
+        RowStartX = 145,
         RowStartY = ScreenCenterY,
         IncrementX = 190,
         ItemOrder = {
@@ -34,10 +34,15 @@ ModUtil.Table.Merge(ScreenData, {
             "HephaestusGift01",
             "HestiaGift01"
         },
+
         ComponentData =
         {
             DefaultGroup = "Combat_Menu_TraitTray",
             UseNativeScreenCenter = true,
+            Order = {
+                "BackgroundTint",
+                "Background"
+            },
 
             BackgroundTint =
             {
@@ -87,13 +92,6 @@ ModUtil.Table.Merge(ScreenData, {
     }
 })
 
-local AltarData = {
-    UseText = "Open Altar",
-    OnUsedFunctionName = mod.OpenAltarMenu,
-    UsePromptOffsetX = 65,
-    UsePromptOffsetY = -50,
-}
-
 function mod.SpawnAltar()
     local unlocked = true
     if unlocked then
@@ -111,28 +109,29 @@ end
 
 function mod.OpenAltarMenu()
     if IsScreenOpen("PonyAltar") then
-		return
-	end
+        return
+    end
 
     local screen = DeepCopyTable(ScreenData.PonyAltar)
-    screen.SelectedGod = GameState.SelectedGod or "No God selected"
-	local components = screen.Components
+    screen.SelectedGod = mod.Data.SelectedGod or "No God selected"
+    local components = screen.Components
     local children = screen.ComponentData.Background.Children
     HideCombatUI( screen.Name )
     OnScreenOpened(screen)
-	CreateScreenFromData(screen, screen.ComponentData)
+    CreateScreenFromData(screen, screen.ComponentData)
 
     components.GodTextbox = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray" })
-	Attach({ Id = components.GodTextbox.Id, DestinationId = components.Background.Id, OffsetX = 0, OffsetY = 250 })
-	CreateTextBox({ Id = components.GodTextbox.Id, Text = screen.SelectedGod,
-		FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
-		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
-	})
+    Attach({ Id = components.GodTextbox.Id, DestinationId = components.Background.Id, OffsetX = 0, OffsetY = 250 })
+    CreateTextBox({ Id = components.GodTextbox.Id, Text = screen.SelectedGod,
+        FontSize = 22, OffsetX = 0, OffsetY = 0, Width = 720, Color = Color.White, Font = "P22UndergroundSCMedium",
+        ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2}, Justification = "Center"
+    })
 
+    -- SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.0, Duration = 0 })
     SetColor({ Id = components.BackgroundTint.Id, Color = Color.Black })
-	SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.0, Duration = 0 })
-	SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.9, Duration = 0.3 })
-	wait(0.3)
+    SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.9, Duration = 0.3 })
+
+    -- wait(0.3)
 
     --Display
     for index, value in ipairs(screen.ItemOrder) do
@@ -145,14 +144,14 @@ function mod.OpenAltarMenu()
             local keepsakeTraitName = "Force"..godName.."BoonKeepsake"
             local level = GetKeepsakeLevel(keepsakeTraitName)
             
-            components[buttonKey] = CreateScreenComponent({ Name = "ButtonDefault", X = screen.RowStartX, Y = screen.RowStartY - 500, Scale = 1.0, Group = "Combat_Menu_TraitTray" })
+            components[buttonKey] = CreateScreenComponent({ Name = "ButtonDefault", X = screen.RowStartX+200, Y = screen.RowStartY - 500, Scale = 1.0, Group = "Combat_Menu_TraitTray" })
             components[buttonKey].Image = key
             components[buttonKey].God = upgradeName
             components[buttonKey].Level = level
             components[buttonKey].Index = index
             SetScaleX({ Id = components[buttonKey].Id, Fraction = 0.69})
             SetScaleY({ Id = components[buttonKey].Id, Fraction = 3.8})
-            components[key] = CreateScreenComponent({ Name = "BlankObstacle", X = screen.RowStartX, Y = screen.RowStartY - 500, Scale = 1.2, Group = "Combat_Menu_TraitTray" })
+            components[key] = CreateScreenComponent({ Name = "BlankObstacle", X = screen.RowStartX+200, Y = screen.RowStartY - 500, Scale = 1.2, Group = "Combat_Menu_TraitTray" })
 
             SetThingProperty({ Property = "Ambient", Value = 0.0, DestinationId = components[key].Id })
             components[buttonKey].OnPressedFunctionName = mod.SelectGod
@@ -160,7 +159,7 @@ function mod.OpenAltarMenu()
 
             SetAlpha({ Ids = { components[key].Id, components[buttonKey].Id }, Fraction = 0 })
             SetAlpha({ Ids = { components[key].Id, components[buttonKey].Id }, Fraction = fraction, Duration = 0.9 })
-            SetAnimation({ DestinationId = components[key].Id, Name = Portraits[index], Scale = 0.4 })
+            SetAnimation({ DestinationId = components[key].Id, Name = mod.Data.Portraits[index], Scale = 0.4 })
             Move({ Ids = { components[key].Id, components[buttonKey].Id }, OffsetX = screen.RowStartX, OffsetY = 500, Duration = index / 10 })
 
             screen.RowStartX = screen.RowStartX + screen.IncrementX
@@ -168,9 +167,9 @@ function mod.OpenAltarMenu()
     end
     --
 
-	SetConfigOption({ Name = "ExclusiveInteractGroup", Value = "Combat_Menu_TraitTray" })
-	screen.KeepOpen = true
-	HandleScreenInput( screen )
+    SetConfigOption({ Name = "ExclusiveInteractGroup", Value = "Combat_Menu_TraitTray" })
+    screen.KeepOpen = true
+    HandleScreenInput( screen )
 end
 
 function mod.ClosePonyAltar(screen)
@@ -190,32 +189,32 @@ local BoonColors = {
 }
 
 function mod.SelectGod(screen, button)
-    if GameState.SelectedGod ~= nil and GameState.SelectedGod == button.God then
+    if mod.Data.SelectedGod ~= nil and mod.Data.SelectedGod == button.God then
         local color = BoonColors[1]
         ModifyTextBox({Id = screen.Components.GodTextbox.Id, Text = "No God selected", Color = color} )
         mod.UnequipAltarBoon()
-        GameState.SelectedGod = nil
-        GameState.RarifyLevel = nil
-        GameState.RarifyUsesLeft = nil
-        GameState.ForceBoonUsesLeft = nil
+        mod.Data.SelectedGod = nil
+        mod.Data.RarifyLevel = nil
+        mod.Data.RarifyUsesLeft = nil
+        mod.Data.ForceBoonUsesLeft = nil
     else
         local color = BoonColors[button.Level]
         ModifyTextBox({Id = screen.Components.GodTextbox.Id, Text = button.God, Color = color} )
         mod.UnequipAltarBoon()
-        GameState.SelectedGod = button.God
-        GameState.RarifyLevel = button.Level
-        GameState.RarifyUsesLeft = 1
-        GameState.ForceBoonUsesLeft = 1
+        mod.Data.SelectedGod = button.God
+        mod.Data.RarifyLevel = button.Level
+        mod.Data.RarifyUsesLeft = 1
+        mod.Data.ForceBoonUsesLeft = 1
         mod.EquipAltarBoon()
     end
 end
 
 function mod.EquipAltarBoon()
-    if GameState.SelectedGod ~= nil then
+    if mod.Data.SelectedGod ~= nil then
         local altarTrait = GetProcessedTraitData({ Unit = CurrentRun.Hero, TraitName = "AltarBoon" })
-        altarTrait.ForceBoonName = GameState.SelectedGod
-        altarTrait.RarityUpgradeData.LootName = GameState.SelectedGod
-        altarTrait.RarityUpgradeData.MaxRarity = GameState.RarifyLevel
+        altarTrait.ForceBoonName = mod.Data.SelectedGod
+        altarTrait.RarityUpgradeData.LootName = mod.Data.SelectedGod
+        altarTrait.RarityUpgradeData.MaxRarity = mod.Data.RarifyLevel
         AddTraitToHero({TraitData = altarTrait})
         if not CurrentRun.Hero.IsDead then
             CurrentRun.TraitCache[altarTrait.Name] = CurrentRun.TraitCache[altarTrait.Name] or 1
