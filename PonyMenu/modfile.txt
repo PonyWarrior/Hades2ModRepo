@@ -1,5 +1,14 @@
 Top Import config.lua
-Import main.lua
+Top Import init.lua
+Import Text/en.lua
+Import Text/fr.lua
+Import Text/zh-CN.lua
+Import Text/zh-TW.lua
 
-To "Scripts/ResourceData.lua"
+Import main.lua
+Import Scripts/MenuScripts.lua
+Import Data/ScreenData.lua
+
+
+To Scripts/ResourceData.lua
 Import Data/ResourceData.lua
