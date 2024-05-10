@@ -29,3 +29,10 @@ if mod.Config.AlwaysEncounterStoryRooms.Enabled then
 	RoomSetData.O.O_Story01.ForceAtBiomeDepthMin = 1
 	RoomSetData.O.O_Story01.ForceAtBiomeDepthMax = 5
 end
+
+if mod.Config.GodMode.Enabled then
+	ModUtil.Path.Override("CalcEasyModeMultiplier", function(...)
+		local easyModeMultiplier = 1 - mod.Config.GodMode.FixedValue
+		return easyModeMultiplier
+	end)
+end
