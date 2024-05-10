@@ -738,7 +738,7 @@ function mod.BoonManagerChangePage(screen, button)
 	end
 	local ids = {}
 	for i, component in pairs(screen.Components) do
-		if component.Resource ~= nil then
+		if component.Resource ~= nil or component.Boon ~= nil then
 			table.insert(ids, component.Id)
 		end
 	end
