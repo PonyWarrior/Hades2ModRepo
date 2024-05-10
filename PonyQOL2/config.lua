@@ -16,4 +16,9 @@ mod.Config = {
 		Enabled = false,
 		FixedValue = 0.2, -- Percentage of damage resistance; 0 = 0%, 0.5 = 50%, 1.0 = 100%
 	},
+	UltraWide =
+	{
+		-- Enable to disable pillarboxing on ultrawide resolutions
+		Enabled = true
+	}
 }

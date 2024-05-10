@@ -4,7 +4,6 @@ if not mod.Config.Enabled then return end
 
 if mod.Config.AllUnlockedToolsUsable.Enabled then
 	ModUtil.Path.Override("HasAccessToTool", function(toolName)
-		print("DEBUG " .. toolName)
 		if GameState.WorldUpgrades[toolName] then
 			return true
 		end
@@ -34,5 +33,13 @@ if mod.Config.GodMode.Enabled then
 	ModUtil.Path.Override("CalcEasyModeMultiplier", function(...)
 		local easyModeMultiplier = 1 - mod.Config.GodMode.FixedValue
 		return easyModeMultiplier
+	end)
+end
+
+if mod.Config.UltraWide.Enabled then
+	ModUtil.Path.Wrap("UpdateConfigOptionCache", function(base)
+		base()
+		ScreenState.NeedsLetterbox = false
+		ScreenState.NeedsPillarbox = false
 	end)
 end
