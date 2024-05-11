@@ -2,7 +2,7 @@ local mod = PonyMenu
 
 if not mod.Config.Enabled then return end
 
--- BOON SELECTOR
+--#region BOON SELECTOR
 
 function mod.OpenBoonSelector(screen, button)
 	if IsScreenOpen("BoonSelector") then
@@ -13,6 +13,9 @@ function mod.OpenBoonSelector(screen, button)
 
 	screen = DeepCopyTable(ScreenData.BoonSelector)
 	screen.Upgrade = button.ItemData.Name
+	screen.FirstPage = 0
+	screen.LastPage = 0
+	screen.CurrentPage = screen.FirstPage
 
 	if screen.Upgrade == "WeaponUpgrade" then
 		mod.BoonData.WeaponUpgrade = {}
@@ -24,67 +27,6 @@ function mod.OpenBoonSelector(screen, button)
 	local children = screen.ComponentData.Background.Children
 	local boons = mod.BoonData[itemData.Name]
 	local lColor = mod.GetLootColor(itemData.Name) or Color.White
-	-- Boon buttons
-
-	for index, boon in ipairs(boons) do
-		local purchaseButtonKey = "PurchaseButton" .. index
-		local rowoffset = 100
-		local columnoffset = 400
-		local numperrow = 4
-		local offsetX = screen.RowStartX + columnoffset * ((index - 1) % numperrow)
-		local offsetY = screen.RowStartY + rowoffset * (math.floor((index - 1) / numperrow))
-		local color = lColor
-		local lockColor = Color.White
-		if HeroHasTrait(boon) then
-			children[purchaseButtonKey] = {
-				AnimationName = "BoonSlotLocked",
-				Name = "BlankObstacle",
-				Group = "Combat_Menu_TraitTray",
-				Scale = 0.3,
-				OffsetX = offsetX,
-				OffsetY = offsetY,
-				Text = boon,
-				TextArgs =
-				{
-					FontSize = 22,
-					Width = 720,
-					Color = Color.DarkGray,
-					Font = "P22UndergroundSCMedium",
-					ShadowBlur = 0,
-					ShadowColor = { 0, 0, 0, 1 },
-					ShadowOffset = { 0, 2 },
-					Justification = "Center"
-				},
-			}
-		else
-			children[purchaseButtonKey] = {
-				Name = "ButtonDefault",
-				Group = "Combat_Menu_TraitTray",
-				Scale = 1.2,
-				ScaleX = 1.15,
-				OffsetX = offsetX,
-				OffsetY = offsetY,
-				Text = boon,
-				Color = lColor,
-				TextArgs =
-				{
-					FontSize = 22,
-					Width = 720,
-					Color = Color.White,
-					Font = "P22UndergroundSCMedium",
-					ShadowBlur = 0,
-					ShadowColor = { 0, 0, 0, 1 },
-					ShadowOffset = { 0, 2 },
-					Justification = "Center"
-				},
-				Data = {
-					OnPressedFunctionName = mod.GiveBoonToPlayer,
-					Boon = boon,
-				},
-			}
-		end
-	end
-	--
 	if itemData.NoRarity then
 		children.CommonButton = nil
 		children.RareButton = nil
@@ -97,7 +39,42 @@ function mod.OpenBoonSelector(screen, button)
 
 	OnScreenOpened(screen)
 	CreateScreenFromData(screen, screen.ComponentData)
+	-- Boon buttons
 
+	local displayedTraits = {}
+	local index = 0
+	screen.BoonsList = {}
+	local rowOffset = 180
+	local columnOffset = 900
+	local boonsPerRow = 2
+	local rowsPerPage = 4
+	local rowoffsetX = -450
+	local rowoffsetY = -250
+	for i, boon in ipairs(boons) do
+		if not Contains(displayedTraits, boon) and not HeroHasTrait(boon) then
+			table.insert(displayedTraits, boon)
+			local rowIndex = math.floor(index / boonsPerRow)
+			local pageIndex = math.floor(rowIndex / rowsPerPage)
+			local offsetX = rowoffsetX + columnOffset * (index % boonsPerRow)
+			local offsetY = rowoffsetY + rowOffset * (rowIndex % rowsPerPage)
+			index = index + 1
+			screen.LastPage = pageIndex
+			if screen.BoonsList[pageIndex] == nil then
+				screen.BoonsList[pageIndex] = {}
+			end
+			local boonData = TraitData[boon]
+			table.insert(screen.BoonsList[pageIndex], {
+				index = index,
+				Boon = boon,
+				BoonData = boonData,
+				pageIndex = pageIndex,
+				offsetX = offsetX,
+				offsetY = offsetY,
+			})
+		end
+	end
+	mod.BoonSelectorLoadPage(screen)
+	--
 	SetColor({ Id = components.BackgroundTint.Id, Color = Color.Black })
 	SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.0, Duration = 0 })
 	SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.9, Duration = 0.3 })
@@ -118,6 +95,7 @@ end
 
 function mod.SpawnBoon(screen, button)
 	CreateLoot({ Name = screen.Upgrade, OffsetX = 100, SpawnPoint = CurrentRun.Hero.ObjectId })
+	mod.CloseBoonSelector(screen)
 end
 
 function mod.ChangeBoonSelectorRarity(screen, button)
@@ -139,43 +117,227 @@ function mod.GiveBoonToPlayer(screen, button)
 				Rarity = screen.Rarity
 			})
 		})
-		mod.LockChoice(screen.Components, button)
+		screen.BoonsList[screen.CurrentPage][button.Index] = nil
+		local ids = { button.Id }
+		if button.Icon then
+			table.insert(ids, button.Icon.Id)
+		end
+		if button.ElementIcon then
+			table.insert(ids, button.ElementIcon.Id)
+		end
+		Destroy({ Ids = ids })
 	end
 end
 
-function mod.LockChoice(components, button)
-	local purchaseButtonKeyLock = tostring(button) .. "Lock"
+function mod.BoonSelectorLoadPage(screen)
+	mod.BoonManagerPageButtons(screen, screen.Name)
+	local displayedTraits = {}
+	local pageBoons = screen.BoonsList[screen.CurrentPage]
+	if pageBoons then
+		local components = screen.Components
+		for i, boon in pairs(pageBoons) do
+			if displayedTraits[boon] then
+				--Skip
+			else
+				local boonData = boon.BoonData
+				displayedTraits[boonData.Name] = true
+				local color = mod.GetLootColorFromTrait(boonData.Name)
+				if boonData.Rarity == nil or boonData.Rarity == "Common" then
+					local tdata = TraitData[boonData.Name]
+					if tdata.RarityLevels and tdata.RarityLevels.Legendary then
+						boonData.Rarity = "Legendary"
+					elseif tdata.IsDuoBoon then
+						boonData.Rarity = "Duo"
+					else
+						boonData.Rarity = "Common"
+					end
+				end
+				local screendata = DeepCopyTable(ScreenData.UpgradeChoice)
+				local upgradeName = boonData.Name
+				local upgradeData = nil
+				local upgradeTitle = nil
+				local upgradeDescription = nil
+				local tooltipData = nil
+				upgradeData = GetProcessedTraitData({
+					Unit = CurrentRun.Hero,
+					TraitName = boonData.Name,
+					Rarity = boonData.Rarity
+				})
+				upgradeTitle = GetTraitTooltipTitle(TraitData[boonData.Name])
+				upgradeData.Title = GetTraitTooltipTitle(TraitData[boonData.Name])
+				tooltipData = upgradeData
+				SetTraitTextData(tooltipData)
+				upgradeDescription = GetTraitTooltip(tooltipData, { Default = upgradeData.Title })
 
-	components[purchaseButtonKeyLock] = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray", Scale = 0.3 })
-	CreateTextBox({
-		Id = components[purchaseButtonKeyLock].Id,
-		Text = button.Boon,
-		FontSize = 22,
-		OffsetX = 0,
-		OffsetY = 0,
-		Width = 720,
-		Color = Color.DarkGray,
-		Font = "P22UndergroundSCMedium",
-		ShadowBlur = 0,
-		ShadowColor = { 0, 0, 0, 1 },
-		ShadowOffset = { 0, 2 },
-		Justification = "Center"
-	})
-	if button.DuoScreen then
-		components[purchaseButtonKeyLock].Boon = button.Boon
+				-- Setting button graphic based on boon type
+				local purchaseButtonKey = "PurchaseButton" .. boon.index
+				local purchaseButton = {
+					Name = "ButtonDefault",
+					OffsetX = boon.offsetX,
+					OffsetY = boon.offsetY,
+					Group = "Combat_Menu_TraitTray",
+					Color = color,
+					ScaleX = 3.2,
+					ScaleY = 2.2,
+					ToDestroy = true
+				}
+				components[purchaseButtonKey] = CreateScreenComponent(purchaseButton)
+				if upgradeData.Icon ~= nil then
+					local icon = screendata.Icon
+					icon.Animation = upgradeData.Icon
+					icon.Scale = 0.25
+					icon.Group = "Combat_Menu_TraitTray"
+					icon.ToDestroy = true
+					components[purchaseButtonKey .. "Icon"] = CreateScreenComponent(icon)
+					components[purchaseButtonKey].Icon = components[purchaseButtonKey .. "Icon"]
+				end
+				if not IsEmpty(upgradeData.Elements) then
+					local elementName = GetFirstValue(upgradeData.Elements)
+					local elementIcon = screendata.ElementIcon
+					elementIcon.Name = TraitElementData[elementName].Icon
+					elementIcon.Scale = 0.5
+					elementIcon.Group = "Combat_Menu_TraitTray"
+					elementIcon.ToDestroy = true
+					components[purchaseButtonKey .. "ElementIcon"] = CreateScreenComponent(elementIcon)
+					components[purchaseButtonKey].ElementIcon = components[purchaseButtonKey .. "ElementIcon"]
+					if not GameState.Flags.SeenElementalIcons then
+						SetAlpha({ Id = components[purchaseButtonKey .. "ElementIcon"].Id, Fraction = 0, Duration = 0 })
+					end
+				end
+
+				-- Button data setup
+				local button = components[purchaseButtonKey]
+				button.OnPressedFunctionName = mod.GiveBoonToPlayer
+				button.Boon = boonData.Name
+				button.Index = boon.index
+				button.OnMouseOverFunctionName = mod.MouseOverBoonButton
+				button.OnMouseOffFunctionName = mod.MouseOffBoonButton
+				button.Data = upgradeData
+				button.Screen = screen
+				button.UpgradeName = upgradeName
+				button.LootColor = boonData.LootColor or Color.White
+				button.BoonGetColor = boonData.BoonGetColor or Color.White
+
+				AttachLua({ Id = components[purchaseButtonKey].Id, Table = components[purchaseButtonKey] })
+				components[components[purchaseButtonKey].Id] = purchaseButtonKey
+				-- Creates upgrade slot text
+				local tooltipX = 0
+				if boon.offsetX < 0 then
+					tooltipX = 700
+				else
+					tooltipX = -700
+				end
+				SetInteractProperty({
+					DestinationId = components[purchaseButtonKey].Id,
+					Property = "TooltipOffsetX",
+					Value = tooltipX
+				})
+				local traitData = TraitData[boonData.Name]
+				local rarity = boonData.Rarity
+				local text = "Boon_" .. rarity
+				if upgradeData.CustomRarityName then
+					text = upgradeData.CustomRarityName
+				end
+
+				local color = Color["BoonPatch" .. rarity]
+				if upgradeData.CustomRarityColor then
+					color = upgradeData.CustomRarityColor
+				end
+				--#region Text
+				local rarityText = ShallowCopyTable(screendata.RarityText)
+				rarityText.FontSize = 24
+				rarityText.ScaleTarget = 0.8
+				rarityText.OffsetY = -40
+				rarityText.Id = button.Id
+				rarityText.Text = text
+				rarityText.Color = color
+				CreateTextBox(rarityText)
+
+				local titleText = ShallowCopyTable(screendata.TitleText)
+				titleText.FontSize = 24
+				titleText.ScaleTarget = 0.8
+				titleText.OffsetY = -40
+				titleText.OffsetX = -360
+				titleText.Id = button.Id
+				titleText.Text = upgradeTitle
+				titleText.Color = color
+				titleText.LuaValue = tooltipData
+				CreateTextBox(titleText)
+
+				local descriptionText = ShallowCopyTable(screendata.DescriptionText)
+				-- descriptionText.FontSize = 24
+				descriptionText.ScaleTarget = 0.8
+				descriptionText.OffsetY = -15
+				descriptionText.OffsetX = -360
+				descriptionText.Width = 800
+				descriptionText.Id = button.Id
+				descriptionText.Text = upgradeDescription
+				descriptionText.LuaValue = tooltipData
+				CreateTextBoxWithFormat(descriptionText)
+				if traitData.StatLines ~= nil then
+					local appendToId = nil
+					if #traitData.StatLines <= 1 then
+						appendToId = descriptionText.Id
+					end
+					for lineNum, statLine in ipairs(traitData.StatLines) do
+						if statLine ~= "" then
+							local offsetY = (lineNum - 1) * screendata.LineHeight
+							if upgradeData.ExtraDescriptionLine then
+								offsetY = offsetY + screendata.LineHeight
+							end
+
+							local statLineLeft = ShallowCopyTable(screendata.StatLineLeft)
+							statLineLeft.Id = button.Id
+							statLineLeft.ScaleTarget = 0.8
+							statLineLeft.Text = statLine
+							statLineLeft.OffsetX = -360
+							statLineLeft.OffsetY = offsetY
+							statLineLeft.AppendToId = appendToId
+							statLineLeft.LuaValue = tooltipData
+							CreateTextBoxWithFormat(statLineLeft)
+
+							local statLineRight = ShallowCopyTable(screendata.StatLineRight)
+							statLineRight.Id = button.Id
+							statLineRight.ScaleTarget = 0.8
+							statLineRight.Text = statLine
+							statLineRight.OffsetX = 100
+							statLineRight.OffsetY = offsetY
+							statLineRight.AppendToId = appendToId
+							statLineRight.LuaValue = tooltipData
+							CreateTextBoxWithFormat(statLineRight)
+						end
+					end
+				end
+				--#endregion
+				Attach({
+					Id = screen.Components[purchaseButtonKey].Id,
+					DestinationId = screen.Components.Background.Id,
+					OffsetX = boon.offsetX,
+					OffsetY = boon.offsetY
+				})
+				if components[purchaseButtonKey].Icon then
+					Attach({
+						Id = screen.Components[purchaseButtonKey .. "Icon"].Id,
+						DestinationId = screen.Components[purchaseButtonKey].Id,
+						OffsetX = -385,
+						OffsetY = -40
+					})
+				end
+				if components[purchaseButtonKey].ElementIcon then
+					Attach({
+						Id = screen.Components[purchaseButtonKey .. "ElementIcon"].Id,
+						DestinationId = screen.Components[purchaseButtonKey].Id,
+						OffsetX = -375,
+						OffsetY = -50
+					})
+				end
+			end
+		end
 	end
-	Attach({
-		Id = components[purchaseButtonKeyLock].Id,
-		DestinationId = components.Background.Id,
-		OffsetX = button
-			.OffsetX,
-		OffsetY = button.OffsetY
-	})
-	Destroy({ Id = button.Id })
-	SetAnimation({ DestinationId = components[purchaseButtonKeyLock].Id, Name = "BoonSlotLocked" })
 end
 
--- RESOURCE MENU
+--#endregion
+--#region RESOURCE MENU
 
 function mod.OpenResourceMenu(screen, button)
 	if IsScreenOpen("BoonSelector") then
@@ -184,7 +346,7 @@ function mod.OpenResourceMenu(screen, button)
 	mod.UpdateScreenData()
 
 	screen = DeepCopyTable(ScreenData.ResourceMenu)
-	screen.Resource = "None"
+	screen.Resource = mod.Locale.ResourceMenuEmpty
 	screen.Amount = 0
 	screen.FirstPage = 0
 	screen.LastPage = 0
@@ -316,6 +478,7 @@ function mod.ResourceMenuLoadPage(screen)
 					"Combat_Menu_TraitTray",
 					Scale = 1.2,
 					ScaleX = 1.15,
+					ToDestroy = true
 				})
 				screen.Components[purchaseButtonKey].OnPressedFunctionName = mod.ChangeTargetResource
 				screen.Components[purchaseButtonKey].Resource = resourceData.name
@@ -345,7 +508,8 @@ function mod.ResourceMenuLoadPage(screen)
 	end
 end
 
--- BOON MANAGER
+--#endregion
+--#region BOON MANAGER
 
 function mod.OpenBoonManager(screen, button)
 	if IsScreenOpen("BoonManager") then
@@ -375,17 +539,19 @@ function mod.OpenBoonManager(screen, button)
 	local displayedTraits = {}
 	local index = 0
 	screen.BoonsList = {}
+	local rowOffset = 180
+	local columnOffset = 900
+	local boonsPerRow = 2
+	local rowsPerPage = 4
+	local rowoffsetX = -450
+	local rowoffsetY = -250
 	for i, boon in pairs(CurrentRun.Hero.Traits) do
 		if not Contains(displayedTraits, boon.Name) and mod.IsBoonManagerValid(boon.Name) then
 			table.insert(displayedTraits, boon.Name)
-			local rowOffset = 100
-			local columnOffset = 400
-			local boonsPerRow = 4
-			local rowsPerPage = 4
 			local rowIndex = math.floor(index / boonsPerRow)
 			local pageIndex = math.floor(rowIndex / rowsPerPage)
-			local offsetX = screen.RowStartX + columnOffset * (index % boonsPerRow)
-			local offsetY = screen.RowStartY + rowOffset * (rowIndex % rowsPerPage)
+			local offsetX = rowoffsetX + columnOffset * (index % boonsPerRow)
+			local offsetY = rowoffsetY + rowOffset * (rowIndex % rowsPerPage)
 			boon.Level = boon.StackNum or 1
 			index = index + 1
 			screen.LastPage = pageIndex
@@ -402,15 +568,15 @@ function mod.OpenBoonManager(screen, button)
 		end
 	end
 	mod.BoonManagerLoadPage(screen)
-	--Instructions
+	--#region Instructions
 	components.ModeDisplay = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray" })
-	Attach({ Id = components.ModeDisplay.Id, DestinationId = components.Background.Id, OffsetX = 0, OffsetY = 200 })
+	Attach({ Id = components.ModeDisplay.Id, DestinationId = components.Background.Id, OffsetX = 0, OffsetY = 0 })
 	CreateTextBox({
 		Id = components.ModeDisplay.Id,
 		Text = mod.Locale.BoonManagerModeSelection,
 		FontSize = 22,
 		OffsetX = 0,
-		OffsetY = 0,
+		OffsetY = 450,
 		Width = 720,
 		Color = Color.White,
 		Font = "P22UndergroundSCMedium",
@@ -424,7 +590,7 @@ function mod.OpenBoonManager(screen, button)
 		Text = mod.Locale.BoonManagerSubtitle,
 		FontSize = 19,
 		OffsetX = 0,
-		OffsetY = -(ScreenCenterY * 0.95),
+		OffsetY = -380,
 		Width = 840,
 		Color = Color.SubTitle,
 		Font = "CaesarDressing",
@@ -433,7 +599,8 @@ function mod.OpenBoonManager(screen, button)
 		ShadowOffset = { 0, 1 },
 		Justification = "Center"
 	})
-	--Mode Buttons
+	--#endregion
+	--#region Mode Buttons
 	components.LevelModeButton = CreateScreenComponent({ Name = "ButtonDefault", Group = "Combat_Menu_TraitTray", Scale = 1.0 })
 	components.LevelModeButton.OnPressedFunctionName = mod.ChangeBoonManagerMode
 	components.LevelModeButton.Mode = "Level"
@@ -441,7 +608,7 @@ function mod.OpenBoonManager(screen, button)
 	components.LevelModeButton.Add = true
 	components.LevelModeButton.Substract = false
 	components.LevelModeButton.Icon = "(+)"
-	Attach({ Id = components.LevelModeButton.Id, DestinationId = components.Background.Id, OffsetX = -450, OffsetY = 300 })
+	Attach({ Id = components.LevelModeButton.Id, DestinationId = components.Background.Id, OffsetX = -650, OffsetY = 450 })
 	CreateTextBox({
 		Id = components.LevelModeButton.Id,
 		Text = components.LevelModeButton.Text .. "(+)",
@@ -463,7 +630,7 @@ function mod.OpenBoonManager(screen, button)
 	components.RarityModeButton.Add = true
 	components.RarityModeButton.Substract = false
 	components.RarityModeButton.Icon = "(+)"
-	Attach({ Id = components.RarityModeButton.Id, DestinationId = components.Background.Id, OffsetX = -150, OffsetY = 300 })
+	Attach({ Id = components.RarityModeButton.Id, DestinationId = components.Background.Id, OffsetX = -350, OffsetY = 450 })
 	CreateTextBox({
 		Id = components.RarityModeButton.Id,
 		Text = components.RarityModeButton.Text .. "(+)",
@@ -482,7 +649,7 @@ function mod.OpenBoonManager(screen, button)
 	components.DeleteModeButton.OnPressedFunctionName = mod.ChangeBoonManagerMode
 	components.DeleteModeButton.Mode = "Delete"
 	components.DeleteModeButton.Text = mod.Locale.BoonManagerDeleteMode
-	Attach({ Id = components.DeleteModeButton.Id, DestinationId = components.Background.Id, OffsetX = 150, OffsetY = 300 })
+	Attach({ Id = components.DeleteModeButton.Id, DestinationId = components.Background.Id, OffsetX = 350, OffsetY = 450 })
 	CreateTextBox({
 		Id = components.DeleteModeButton.Id,
 		Text = components.DeleteModeButton.Text,
@@ -501,7 +668,7 @@ function mod.OpenBoonManager(screen, button)
 	components.AllModeButton.OnPressedFunctionName = mod.ChangeBoonManagerMode
 	components.AllModeButton.Mode = "All"
 	components.AllModeButton.Text = mod.Locale.BoonManagerAllModeOff
-	Attach({ Id = components.AllModeButton.Id, DestinationId = components.Background.Id, OffsetX = 450, OffsetY = 300 })
+	Attach({ Id = components.AllModeButton.Id, DestinationId = components.Background.Id, OffsetX = 650, OffsetY = 450 })
 	CreateTextBox({
 		Id = components.AllModeButton.Id,
 		Text = components.AllModeButton.Text,
@@ -516,7 +683,7 @@ function mod.OpenBoonManager(screen, button)
 		ShadowOffset = { 0, 2 },
 		Justification = "Center"
 	})
-	--End
+	--#endregion
 
 	SetColor({ Id = components.BackgroundTint.Id, Color = Color.Black })
 	SetAlpha({ Id = components.BackgroundTint.Id, Fraction = 0.0, Duration = 0 })
@@ -544,7 +711,7 @@ function mod.ChangeBoonManagerMode(screen, button)
 			Id = screen.LockedModeButton.Id,
 			Text = screen.LockedModeButton.Text .. (screen.LockedModeButton.Icon or "")
 		})
-	elseif screen.LockedModeButton ~= nil and screen.LockedModeButton == button then
+	elseif button.Mode ~= "Delete" and screen.LockedModeButton ~= nil and screen.LockedModeButton == button then
 		-- Switch add or subtract submode (does nothing for Delete mode)
 		if button.Add == false then
 			button.Substract = false
@@ -581,7 +748,11 @@ function mod.HandleBoonManagerClick(screen, button)
 				for _, levelbutton in pairs(screen.Components) do
 					if not levelbutton.IsBackground and levelbutton.Boon ~= nil then
 						levelbutton.Boon.Level = levelbutton.Boon.Level + 1
-						ModifyTextBox({ Id = levelbutton.Background.Id, Text = mod.Locale.BoonManagerLevelDisplay .. levelbutton.Boon.Level })
+						ModifyTextBox({
+							Id = levelbutton.Background.Id,
+							Text = mod.Locale.BoonManagerLevelDisplay ..
+								levelbutton.Boon.Level
+						})
 					end
 				end
 				while not IsEmpty(upgradableTraits) do
@@ -608,7 +779,11 @@ function mod.HandleBoonManagerClick(screen, button)
 				for _, levelbutton in pairs(screen.Components) do
 					if not levelbutton.IsBackground and levelbutton.Boon ~= nil then
 						levelbutton.Boon.Level = levelbutton.Boon.Level - 1
-						ModifyTextBox({ Id = levelbutton.Background.Id, Text = mod.Locale.BoonManagerLevelDisplay .. levelbutton.Boon.Level })
+						ModifyTextBox({
+							Id = levelbutton.Background.Id,
+							Text = mod.Locale.BoonManagerLevelDisplay ..
+								levelbutton.Boon.Level
+						})
 					end
 				end
 				while not IsEmpty(upgradableTraits) do
@@ -668,7 +843,11 @@ function mod.HandleBoonManagerClick(screen, button)
 				stacks = stacks + 1
 				IncreaseTraitLevel(traitData, stacks)
 				button.Boon.Level = button.Boon.Level + 1
-				ModifyTextBox({ Id = button.Background.Id, Text = mod.Locale.BoonManagerLevelDisplay .. button.Boon.Level })
+				ModifyTextBox({
+					Id = button.Background.Id,
+					Text = mod.Locale.BoonManagerLevelDisplay .. button.Boon
+						.Level
+				})
 			end
 			return
 		elseif screen.Mode == "Level" and screen.LockedModeButton.Substract == true then
@@ -678,7 +857,11 @@ function mod.HandleBoonManagerClick(screen, button)
 				stacks = stacks - 1
 				IncreaseTraitLevel(traitData, stacks)
 				button.Boon.Level = button.Boon.Level - 1
-				ModifyTextBox({ Id = button.Background.Id, Text = mod.Locale.BoonManagerLevelDisplay .. button.Boon.Level })
+				ModifyTextBox({
+					Id = button.Background.Id,
+					Text = mod.Locale.BoonManagerLevelDisplay .. button.Boon
+						.Level
+				})
 			end
 			return
 		elseif screen.Mode == "Rarity" and screen.LockedModeButton.Add == true then
@@ -722,7 +905,14 @@ function mod.HandleBoonManagerClick(screen, button)
 		elseif screen.Mode == "Delete" then
 			screen.BoonsList[screen.CurrentPage][button.Index] = nil
 			RemoveTrait(CurrentRun.Hero, button.Boon.Name)
-			Destroy({ Ids = { button.Id, button.Background.Id } })
+			local ids = { button.Id, button.Background.Id }
+			if button.Icon then
+				table.insert(ids, button.Icon.Id)
+			end
+			if button.ElementIcon then
+				table.insert(ids, button.ElementIcon.Id)
+			end
+			Destroy({ Ids = ids })
 			return
 		end
 	end
@@ -738,7 +928,7 @@ function mod.BoonManagerChangePage(screen, button)
 	end
 	local ids = {}
 	for i, component in pairs(screen.Components) do
-		if component.Resource ~= nil or component.Boon ~= nil then
+		if component.ToDestroy then
 			table.insert(ids, component.Id)
 		end
 	end
@@ -747,6 +937,8 @@ function mod.BoonManagerChangePage(screen, button)
 		mod.ResourceMenuLoadPage(screen)
 	elseif button.Menu == "BoonManager" then
 		mod.BoonManagerLoadPage(screen)
+	elseif button.Menu == "BoonSelector" then
+		mod.BoonSelectorLoadPage(screen)
 	end
 end
 
@@ -755,31 +947,40 @@ function mod.BoonManagerLoadPage(screen)
 	local displayedTraits = {}
 	local pageBoons = screen.BoonsList[screen.CurrentPage]
 	if pageBoons then
+		local components = screen.Components
 		for i, boonData in pairs(pageBoons) do
 			if displayedTraits[boonData.boon.Name] or displayedTraits[boonData.boon] then
 				--Skip
 			else
-				local color = mod.GetLootColorFromTrait(boonData.boon.Name)
-				if boonData.boon.Rarity == nil then
-					boonData.boon.Rarity = "Common"
-				end
 				displayedTraits[boonData.boon.Name] = true
+				local color = mod.GetLootColorFromTrait(boonData.boon.Name)
+				if boonData.boon.Rarity == nil or boonData.boon.Rarity == "Common" then
+					local tdata = TraitData[boonData.boon.Name]
+					if tdata.RarityLevels and tdata.RarityLevels.Legendary then
+						boonData.boon.Rarity = "Legendary"
+					elseif tdata.IsDuoBoon then
+						boonData.boon.Rarity = "Duo"
+					else
+						boonData.boon.Rarity = "Common"
+					end
+				end
 				local purchaseButtonKeyBG = "PurchaseButtonBG" .. boonData.index
 				screen.Components[purchaseButtonKeyBG] = CreateScreenComponent({
 					Name = "rectangle01",
 					Group =
 					"Combat_Menu_TraitTray",
-					Scale = 0.38,
-					ScaleX = 2.2
+					ScaleX = 1.87,
+					ScaleY = 0.65,
+					IsBackground = true,
+					Boon = boonData.boon,
+					ToDestroy = true
 				})
-				screen.Components[purchaseButtonKeyBG].IsBackground = true
-				screen.Components[purchaseButtonKeyBG].Boon = boonData.boon
 				CreateTextBox({
 					Id = screen.Components[purchaseButtonKeyBG].Id,
 					Text = mod.Locale.BoonManagerLevelDisplay .. boonData.boon.Level,
-					FontSize = 15,
-					OffsetX = 95,
-					OffsetY = 16,
+					FontSize = 20,
+					OffsetX = 200,
+					OffsetY = -45,
 					Width = 720,
 					Color = Color.White,
 					Font = "P22UndergroundSCMedium",
@@ -790,48 +991,193 @@ function mod.BoonManagerLoadPage(screen)
 				})
 				SetColor({
 					Id = screen.Components[purchaseButtonKeyBG].Id,
-					Color = Color
-						["BoonPatch" .. boonData.boon.Rarity]
+					Color = Color["BoonPatch" .. boonData.boon.Rarity]
 				})
+
+				local screendata = DeepCopyTable(ScreenData.UpgradeChoice)
+				local upgradeName = boonData.boon.Name
+				local upgradeData = nil
+				local upgradeTitle = nil
+				local upgradeDescription = nil
+				local tooltipData = nil
+				upgradeData = GetProcessedTraitData({
+					Unit = CurrentRun.Hero,
+					TraitName = boonData.boon.Name,
+					Rarity = boonData.boon.Rarity
+				})
+				upgradeTitle = GetTraitTooltipTitle(TraitData[boonData.boon.Name])
+				upgradeData.Title = GetTraitTooltipTitle(TraitData[boonData.boon.Name])
+				tooltipData = upgradeData
+				SetTraitTextData(tooltipData)
+				upgradeDescription = GetTraitTooltip(tooltipData, { Default = upgradeData.Title })
+
+				-- Setting button graphic based on boon type
 				local purchaseButtonKey = "PurchaseButton" .. boonData.index
-				screen.Components[purchaseButtonKey] = CreateScreenComponent({
+				local purchaseButton = {
 					Name = "ButtonDefault",
-					Group =
-					"Combat_Menu_TraitTray",
-					Scale = 1.2,
-					ScaleX = 1.15,
-					Color = color
+					OffsetX = boonData.offsetX,
+					OffsetY = boonData.offsetY,
+					Group = "Combat_Menu_TraitTray",
+					Color = color,
+					ScaleX = 3.2,
+					ScaleY = 2.2,
+					ToDestroy = true
+				}
+				components[purchaseButtonKey] = CreateScreenComponent(purchaseButton)
+				components[purchaseButtonKey].Background = screen.Components[purchaseButtonKeyBG]
+				if upgradeData.Icon ~= nil then
+					local icon = screendata.Icon
+					icon.Animation = upgradeData.Icon
+					icon.Scale = 0.25
+					icon.Group = "Combat_Menu_TraitTray"
+					icon.ToDestroy = true
+					components[purchaseButtonKey .. "Icon"] = CreateScreenComponent(icon)
+					components[purchaseButtonKey].Icon = components[purchaseButtonKey .. "Icon"]
+				end
+				if not IsEmpty(upgradeData.Elements) then
+					local elementName = GetFirstValue(upgradeData.Elements)
+					local elementIcon = screendata.ElementIcon
+					elementIcon.Name = TraitElementData[elementName].Icon
+					elementIcon.Scale = 0.5
+					elementIcon.Group = "Combat_Menu_TraitTray"
+					elementIcon.ToDestroy = true
+					components[purchaseButtonKey .. "ElementIcon"] = CreateScreenComponent(elementIcon)
+					components[purchaseButtonKey].ElementIcon = components[purchaseButtonKey .. "ElementIcon"]
+					if not GameState.Flags.SeenElementalIcons then
+						SetAlpha({ Id = components[purchaseButtonKey .. "ElementIcon"].Id, Fraction = 0, Duration = 0 })
+					end
+				end
+
+				-- Button data setup
+				local button = components[purchaseButtonKey]
+				button.OnPressedFunctionName = mod.HandleBoonManagerClick
+				button.Boon = boonData.boon
+				button.Index = boonData.index
+				button.OnMouseOverFunctionName = mod.MouseOverBoonButton
+				button.OnMouseOffFunctionName = mod.MouseOffBoonButton
+				button.Data = upgradeData
+				button.Screen = screen
+				button.UpgradeName = upgradeName
+				button.LootColor = boonData.boon.LootColor or Color.White
+				button.BoonGetColor = boonData.boon.BoonGetColor or Color.White
+
+				AttachLua({ Id = components[purchaseButtonKey].Id, Table = components[purchaseButtonKey] })
+				components[components[purchaseButtonKey].Id] = purchaseButtonKey
+				-- Creates upgrade slot text
+				local tooltipX = 0
+				if boonData.offsetX < 0 then
+					tooltipX = 700
+				else
+					tooltipX = -700
+				end
+				SetInteractProperty({
+					DestinationId = components[purchaseButtonKey].Id,
+					Property = "TooltipOffsetX",
+					Value = tooltipX
 				})
-				screen.Components[purchaseButtonKey].OnPressedFunctionName = mod.HandleBoonManagerClick
-				screen.Components[purchaseButtonKey].Boon = boonData.boon
-				screen.Components[purchaseButtonKey].Index = boonData.index
-				screen.Components[purchaseButtonKey].Background = screen.Components[purchaseButtonKeyBG]
+				local traitData = TraitData[boonData.boon.Name]
+				local rarity = boonData.boon.Rarity
+				local text = "Boon_" .. rarity
+				if upgradeData.CustomRarityName then
+					text = upgradeData.CustomRarityName
+				end
+
+				local color = Color["BoonPatch" .. rarity]
+				if upgradeData.CustomRarityColor then
+					color = upgradeData.CustomRarityColor
+				end
+				--#region Text
+				local rarityText = ShallowCopyTable(screendata.RarityText)
+				rarityText.FontSize = 24
+				rarityText.ScaleTarget = 0.8
+				rarityText.OffsetY = -40
+				rarityText.Id = button.Id
+				rarityText.Text = text
+				rarityText.Color = color
+				CreateTextBox(rarityText)
+
+				local titleText = ShallowCopyTable(screendata.TitleText)
+				titleText.FontSize = 24
+				titleText.ScaleTarget = 0.8
+				titleText.OffsetY = -40
+				titleText.OffsetX = -360
+				titleText.Id = button.Id
+				titleText.Text = upgradeTitle
+				titleText.Color = color
+				titleText.LuaValue = tooltipData
+				CreateTextBox(titleText)
+
+				local descriptionText = ShallowCopyTable(screendata.DescriptionText)
+				-- descriptionText.FontSize = 24
+				descriptionText.ScaleTarget = 0.8
+				descriptionText.OffsetY = -15
+				descriptionText.OffsetX = -360
+				descriptionText.Width = 800
+				descriptionText.Id = button.Id
+				descriptionText.Text = upgradeDescription
+				descriptionText.LuaValue = tooltipData
+				CreateTextBoxWithFormat(descriptionText)
+				if traitData.StatLines ~= nil then
+					local appendToId = nil
+					if #traitData.StatLines <= 1 then
+						appendToId = descriptionText.Id
+					end
+					for lineNum, statLine in ipairs(traitData.StatLines) do
+						if statLine ~= "" then
+							local offsetY = (lineNum - 1) * screendata.LineHeight
+							if upgradeData.ExtraDescriptionLine then
+								offsetY = offsetY + screendata.LineHeight
+							end
+
+							local statLineLeft = ShallowCopyTable(screendata.StatLineLeft)
+							statLineLeft.Id = button.Id
+							statLineLeft.ScaleTarget = 0.8
+							statLineLeft.Text = statLine
+							statLineLeft.OffsetX = -360
+							statLineLeft.OffsetY = offsetY
+							statLineLeft.AppendToId = appendToId
+							statLineLeft.LuaValue = tooltipData
+							CreateTextBoxWithFormat(statLineLeft)
+
+							local statLineRight = ShallowCopyTable(screendata.StatLineRight)
+							statLineRight.Id = button.Id
+							statLineRight.ScaleTarget = 0.8
+							statLineRight.Text = statLine
+							statLineRight.OffsetX = 100
+							statLineRight.OffsetY = offsetY
+							statLineRight.AppendToId = appendToId
+							statLineRight.LuaValue = tooltipData
+							CreateTextBoxWithFormat(statLineRight)
+						end
+					end
+				end
+				--#endregion
 				Attach({
 					Id = screen.Components[purchaseButtonKey].Id,
 					DestinationId = screen.Components.Background.Id,
-					OffsetX =
-						boonData.offsetX,
+					OffsetX = boonData.offsetX,
 					OffsetY = boonData.offsetY
 				})
 				Attach({
 					Id = screen.Components[purchaseButtonKeyBG].Id,
-					DestinationId = screen.Components
-						[purchaseButtonKey].Id
+					DestinationId = screen.Components[purchaseButtonKey].Id
 				})
-				CreateTextBox({
-					Id = screen.Components[purchaseButtonKey].Id,
-					Text = boonData.boon.Name,
-					FontSize = 22,
-					OffsetX = 0,
-					OffsetY = -5,
-					Width = 720,
-					Color = Color.White,
-					Font = "P22UndergroundSCMedium",
-					ShadowBlur = 0,
-					ShadowColor = { 0, 0, 0, 1 },
-					ShadowOffset = { 0, 2 },
-					Justification = "Center"
-				})
+				if components[purchaseButtonKey].Icon then
+					Attach({
+						Id = screen.Components[purchaseButtonKey .. "Icon"].Id,
+						DestinationId = screen.Components[purchaseButtonKey].Id,
+						OffsetX = -385,
+						OffsetY = -40
+					})
+				end
+				if components[purchaseButtonKey].ElementIcon then
+					Attach({
+						Id = screen.Components[purchaseButtonKey .. "ElementIcon"].Id,
+						DestinationId = screen.Components[purchaseButtonKey].Id,
+						OffsetX = -375,
+						OffsetY = -50
+					})
+				end
 			end
 		end
 	end
@@ -848,12 +1194,12 @@ function mod.BoonManagerPageButtons(screen, menu)
 	if screen.CurrentPage ~= screen.FirstPage then
 		components.LeftPageButton = CreateScreenComponent({
 			Name = "ButtonCodexLeft",
-			Scale = 0.8,
+			Scale = 1.2,
 			Sound =
 			"/SFX/Menu Sounds/GeneralWhooshMENU",
 			Group = "Combat_Menu_TraitTray"
 		})
-		Attach({ Id = components.LeftPageButton.Id, DestinationId = components.Background.Id, OffsetX = -480, OffsetY = -350 })
+		Attach({ Id = components.LeftPageButton.Id, DestinationId = components.Background.Id, OffsetX = -650, OffsetY = -380 })
 		components.LeftPageButton.OnPressedFunctionName = mod.BoonManagerChangePage
 		components.LeftPageButton.Menu = menu
 		components.LeftPageButton.Direction = "Left"
@@ -862,12 +1208,12 @@ function mod.BoonManagerPageButtons(screen, menu)
 	if screen.CurrentPage ~= screen.LastPage then
 		components.RightPageButton = CreateScreenComponent({
 			Name = "ButtonCodexRight",
-			Scale = 0.8,
+			Scale = 1.2,
 			Sound =
 			"/SFX/Menu Sounds/GeneralWhooshMENU",
 			Group = "Combat_Menu_TraitTray"
 		})
-		Attach({ Id = components.RightPageButton.Id, DestinationId = components.Background.Id, OffsetX = 720, OffsetY = -350 })
+		Attach({ Id = components.RightPageButton.Id, DestinationId = components.Background.Id, OffsetX = 650, OffsetY = -380 })
 		components.RightPageButton.OnPressedFunctionName = mod.BoonManagerChangePage
 		components.RightPageButton.Menu = menu
 		components.RightPageButton.Direction = "Right"
@@ -893,3 +1239,34 @@ function mod.IsBoonManagerValid(traitName)
 	end
 	return true
 end
+
+function mod.MouseOverBoonButton(button)
+	local screen = button.Screen
+	if screen.Closing then
+		return
+	end
+
+	GenericMouseOverPresentation(button)
+
+	local components = screen.Components
+	local buttonHighlight = CreateScreenComponent({
+		Name = "InventorySlotHighlight",
+		Scale = 1.0,
+		Group =
+		"Combat_Menu_Overlay",
+		DestinationId = button.Id
+	})
+	components.InventorySlotHighlight = buttonHighlight
+	button.HighlightId = buttonHighlight.Id
+	Attach({ Id = buttonHighlight.Id, DestinationId = button.Id })
+end
+
+function mod.MouseOffBoonButton(button)
+	Destroy({ Id = button.HighlightId })
+	local components = button.Screen.Components
+	components.InventorySlotHighlight = nil
+	SetScale({ Id = button.Id, Fraction = 1.0, Duration = 0.1, SkipGeometryUpdate = true })
+	StopFlashing({ Id = button.Id })
+end
+
+--#endregion

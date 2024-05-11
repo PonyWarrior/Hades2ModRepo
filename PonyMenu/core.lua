@@ -24,9 +24,10 @@ local function setupMainData()
 		TrialUpgrade = {},
 		SpellDrop = {},
 		WeaponUpgrade = {},
-		Arachne = {},
-		Narcissus = {},
-		Hades = {},
+		NPC_Arachne_01 = {},
+		NPC_Narcissus_01 = {},
+		NPC_Echo_01 = {},
+		NPC_LordHades_01 = {},
 	}
 end
 
@@ -45,6 +46,11 @@ ModUtil.Path.Override("InventoryScreenDisplayCategory", function(screen, categor
 
 	-- Cleanup prev category
 	local prevCategory = screen.ItemCategories[screen.ActiveCategoryIndex]
+	--Mod start
+	if prevCategory == nil then
+		prevCategory = screen.ItemCategories[1]
+	end
+	-- Mod end
 	if prevCategory.CloseFunctionName ~= nil then
 		CallFunctionName(prevCategory.CloseFunctionName, screen)
 	else
@@ -81,7 +87,7 @@ ModUtil.Path.Override("InventoryScreenDisplayCategory", function(screen, categor
 		Group = "Combat_Menu_TraitTray"
 	})
 	--Mod Start
-	if category.Name == "PONYMENU" then
+	if category.Name == "PONYMENU" or category.Name == "Pony Menu" then
 		ModifyTextBox({ Id = screen.Components.CategoryTitleText.Id, Text = mod.Locale.PonyMenuCategoryTitle })
 	else
 		ModifyTextBox({ Id = screen.Components.CategoryTitleText.Id, Text = category.Name })
@@ -110,7 +116,7 @@ ModUtil.Path.Override("InventoryScreenDisplayCategory", function(screen, categor
 	local resourceLocation = { X = screen.GridStartX, Y = screen.GridStartY }
 	local columnNum = 1
 	-- Mod start
-	if category.Name ~= "PONYMENU" then
+	if category.Name ~= "PONYMENU" and category.Name ~= "Pony Menu" then
 		for i, resourceName in ipairs(category) do
 			local resourceData = ResourceData[resourceName]
 			if (GameState.LifetimeResourcesGained[resourceName] or 0) > 0 or (resourceData.RevealGameStateRequirements ~= nil and IsGameStateEligible(CurrentRun, resourceData, resourceData.RevealGameStateRequirements)) then
@@ -360,6 +366,11 @@ function mod.PopulateBoonData(upgradeName)
 				index = index + 1
 				mod.BoonData[upgradeName][index] = v
 			end
+		elseif upgradeName == "NPC_Echo_01" then
+			for k, v in pairs(UnitSetData.NPC_Echo.NPC_Echo_01.Traits) do
+				index = index + 1
+				mod.BoonData[upgradeName][index] = v
+			end
 		elseif upgradeName == "NPC_LordHades_01" then
 			for k, v in pairs(UnitSetData.NPC_Hades.NPC_Hades_Field_01.Traits) do
 				index = index + 1
@@ -385,6 +396,8 @@ function mod.GetLootColor(upgradeName)
 		color = Color.ArachneVoice
 	elseif upgradeName == "ArtemisUpgrade" then
 		color = UnitSetData.NPC_Artemis.NPC_Artemis_Field_01.LootColor
+	elseif upgradeName == "NPC_Echo_01" then
+		color = Color.EchoVoice
 	elseif upgradeName == "NPC_Narcissus_01" then
 		color = Color.NarcissusVoice
 	elseif upgradeName == "NPC_LordHades_01" then

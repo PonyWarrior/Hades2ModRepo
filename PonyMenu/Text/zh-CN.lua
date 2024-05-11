@@ -28,5 +28,6 @@ mod.AddLocale("zh-CN", {
 
 	ResourceMenuTitle = "资源选单",
 	ResourceMenuDescription = "创造任何数量的资源。",
-	ResourceMenuSpawnButton = "创造资源"
+	ResourceMenuSpawnButton = "创造资源",
+	ResourceMenuEmpty = "空"
 })

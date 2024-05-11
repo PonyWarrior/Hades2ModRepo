@@ -28,5 +28,6 @@ mod.AddLocale("en", {
 
 	ResourceMenuTitle = "Resource Menu",
 	ResourceMenuDescription = "Spawn any resource in any amount.",
-	ResourceMenuSpawnButton = "Spawn Resource"
+	ResourceMenuSpawnButton = "Spawn Resource",
+	ResourceMenuEmpty = "None"
 })

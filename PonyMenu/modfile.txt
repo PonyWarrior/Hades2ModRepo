@@ -5,7 +5,7 @@ Import Text/fr.lua
 Import Text/zh-CN.lua
 Import Text/zh-TW.lua
 
-Import main.lua
+Import core.lua
 Import Scripts/MenuScripts.lua
 Import Data/ScreenData.lua
 

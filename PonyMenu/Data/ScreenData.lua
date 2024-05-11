@@ -54,7 +54,7 @@ function mod.setupScreenData()
 							Scale = 1.2,
 							ScaleX = 1.15,
 							OffsetX = 0,
-							OffsetY = 380,
+							OffsetY = 420,
 							Text = mod.Locale.BoonSelectorSpawnButton,
 							TextArgs =
 							{
@@ -78,7 +78,7 @@ function mod.setupScreenData()
 							Group = "Combat_Menu_TraitTray",
 							Scale = 1.2,
 							ScaleX = 0.8,
-							OffsetX = -450,
+							OffsetX = -650,
 							OffsetY = 480,
 							Text = mod.Locale.BoonSelectorCommonButton,
 							TextArgs =
@@ -103,7 +103,7 @@ function mod.setupScreenData()
 							Group = "Combat_Menu_TraitTray",
 							Scale = 1.2,
 							ScaleX = 0.8,
-							OffsetX = -150,
+							OffsetX = -350,
 							OffsetY = 480,
 							Text = mod.Locale.BoonSelectorRareButton,
 							TextArgs =
@@ -128,7 +128,7 @@ function mod.setupScreenData()
 							Group = "Combat_Menu_TraitTray",
 							Scale = 1.2,
 							ScaleX = 0.8,
-							OffsetX = 150,
+							OffsetX = 350,
 							OffsetY = 480,
 							Text = mod.Locale.BoonSelectorEpicButton,
 							TextArgs =
@@ -153,7 +153,7 @@ function mod.setupScreenData()
 							Group = "Combat_Menu_TraitTray",
 							Scale = 1.2,
 							ScaleX = 0.8,
-							OffsetX = 450,
+							OffsetX = 650,
 							OffsetY = 480,
 							Text = mod.Locale.BoonSelectorHeroicButton,
 							TextArgs =
@@ -178,7 +178,7 @@ function mod.setupScreenData()
 							GroupName = "Combat_Menu_TraitTray",
 							Scale = 0.7,
 							OffsetX = 0,
-							OffsetY = 550,
+							OffsetY = 510,
 							Data =
 							{
 								OnPressedFunctionName = mod.CloseBoonSelector,
@@ -458,7 +458,7 @@ function mod.setupScreenData()
 							GroupName = "Combat_Menu_TraitTray",
 							Scale = 0.7,
 							OffsetX = 0,
-							OffsetY = ScreenCenterY + 10,
+							OffsetY = 510,
 							Data =
 							{
 								OnPressedFunctionName = mod.CloseBoonSelector,
@@ -561,6 +561,7 @@ function mod.setupCommandData()
 			IconScale = 0.6,
 			Name = "NPC_Arachne_01",
 			Type = "Boon",
+			NoRarity = true,
 			NoSpawn = true
 		},
 		{
@@ -568,6 +569,15 @@ function mod.setupCommandData()
 			IconScale = 0.6,
 			Name = "NPC_Narcissus_01",
 			Type = "Boon",
+			NoRarity = true,
+			NoSpawn = true
+		},
+		{
+			IconPath = "GUI\\Icons\\GhostEmote\\Grief",
+			IconScale = 0.6,
+			Name = "NPC_Echo_01",
+			Type = "Boon",
+			NoRarity = true,
 			NoSpawn = true
 		},
 		{
@@ -575,6 +585,7 @@ function mod.setupCommandData()
 			IconScale = 0.4,
 			Name = "NPC_LordHades_01",
 			Type = "Boon",
+			NoRarity = true,
 			NoSpawn = true
 		},
 		{

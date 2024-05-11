@@ -28,5 +28,6 @@ mod.AddLocale("zh-TW", {
 
 	ResourceMenuTitle = "資源選單",
 	ResourceMenuDescription = "創造任何數量的資源。",
-	ResourceMenuSpawnButton = "創造資源"
+	ResourceMenuSpawnButton = "創造資源",
+	ResourceMenuEmpty = "空"
 })
