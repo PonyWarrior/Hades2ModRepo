@@ -936,7 +936,7 @@ function mod.HandleBoonManagerClick(screen, button)
 			return
 		elseif screen.Mode == "Rarity" and screen.LockedModeButton.Add == true then
 			if IsGodTrait(button.Boon.Name, { ForShop = true }) then
-				if TraitData[button.Boon.Name] and button.Boon.Rarity ~= nil and GetUpgradedRarity(button.Boon.Rarity) ~= nil and button.Boon.RarityLevels[GetUpgradedRarity(button.Boon.Rarity)] ~= nil then
+				if TraitData[button.Boon.Name] and button.Boon.Rarity ~= nil and GetUpgradedRarity(button.Boon.Rarity) ~= nil and button.Boon.RarityLevels ~= nil and button.Boon.RarityLevels[GetUpgradedRarity(button.Boon.Rarity)] ~= nil then
 					local count = GetTraitCount(CurrentRun.Hero, button.Boon)
 					button.Boon.Rarity = GetUpgradedRarity(button.Boon.Rarity)
 					SetColor({ Id = button.Background.Id, Color = Color["BoonPatch" .. button.Boon.Rarity] })
@@ -955,7 +955,7 @@ function mod.HandleBoonManagerClick(screen, button)
 			return
 		elseif screen.Mode == "Rarity" and screen.LockedModeButton.Substract == true then
 			if IsGodTrait(button.Boon.Name, { ForShop = true }) then
-				if TraitData[button.Boon.Name] and button.Boon.Rarity ~= nil and GetDowngradedRarity(button.Boon.Rarity) ~= nil and button.Boon.RarityLevels[GetDowngradedRarity(button.Boon.Rarity)] ~= nil then
+				if TraitData[button.Boon.Name] and button.Boon.Rarity ~= nil and GetDowngradedRarity(button.Boon.Rarity) ~= nil and button.Boon.RarityLevels ~= nil and button.Boon.RarityLevels[GetDowngradedRarity(button.Boon.Rarity)] ~= nil then
 					local count = GetTraitCount(CurrentRun.Hero, button.Boon)
 					button.Boon.Rarity = GetDowngradedRarity(button.Boon.Rarity)
 					SetColor({ Id = button.Background.Id, Color = Color["BoonPatch" .. button.Boon.Rarity] })
