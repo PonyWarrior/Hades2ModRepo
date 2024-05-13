@@ -557,37 +557,7 @@ function mod.OpenBoonManager(screen, button)
 	OnScreenOpened(screen)
 	CreateScreenFromData(screen, screen.ComponentData)
 
-	local displayedTraits = {}
-	local index = 0
-	screen.BoonsList = {}
-	local rowOffset = 180
-	local columnOffset = 900
-	local boonsPerRow = 2
-	local rowsPerPage = 4
-	local rowoffsetX = -450
-	local rowoffsetY = -250
-	for i, boon in pairs(CurrentRun.Hero.Traits) do
-		if not Contains(displayedTraits, boon.Name) and mod.IsBoonManagerValid(boon.Name) then
-			table.insert(displayedTraits, boon.Name)
-			local rowIndex = math.floor(index / boonsPerRow)
-			local pageIndex = math.floor(rowIndex / rowsPerPage)
-			local offsetX = rowoffsetX + columnOffset * (index % boonsPerRow)
-			local offsetY = rowoffsetY + rowOffset * (rowIndex % rowsPerPage)
-			boon.Level = boon.StackNum or 1
-			index = index + 1
-			screen.LastPage = pageIndex
-			if screen.BoonsList[pageIndex] == nil then
-				screen.BoonsList[pageIndex] = {}
-			end
-			table.insert(screen.BoonsList[pageIndex], {
-				index = index,
-				boon = boon,
-				pageIndex = pageIndex,
-				offsetX = offsetX,
-				offsetY = offsetY,
-			})
-		end
-	end
+	mod.LoadPageBoons(screen)
 	mod.BoonManagerLoadPage(screen)
 	--#region Instructions
 	components.ModeDisplay = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray" })
@@ -716,6 +686,40 @@ function mod.OpenBoonManager(screen, button)
 	HandleScreenInput(screen)
 end
 
+function mod.LoadPageBoons(screen)
+	local displayedTraits = {}
+	local index = 0
+	screen.BoonsList = {}
+	local rowOffset = 180
+	local columnOffset = 900
+	local boonsPerRow = 2
+	local rowsPerPage = 4
+	local rowoffsetX = -450
+	local rowoffsetY = -250
+	for i, boon in pairs(CurrentRun.Hero.Traits) do
+		if not Contains(displayedTraits, boon.Name) and mod.IsBoonManagerValid(boon.Name) then
+			table.insert(displayedTraits, boon.Name)
+			local rowIndex = math.floor(index / boonsPerRow)
+			local pageIndex = math.floor(rowIndex / rowsPerPage)
+			local offsetX = rowoffsetX + columnOffset * (index % boonsPerRow)
+			local offsetY = rowoffsetY + rowOffset * (rowIndex % rowsPerPage)
+			boon.Level = boon.StackNum or 1
+			index = index + 1
+			screen.LastPage = pageIndex
+			if screen.BoonsList[pageIndex] == nil then
+				screen.BoonsList[pageIndex] = {}
+			end
+			table.insert(screen.BoonsList[pageIndex], {
+				index = index,
+				boon = boon,
+				pageIndex = pageIndex,
+				offsetX = offsetX,
+				offsetY = offsetY,
+			})
+		end
+	end
+end
+
 function mod.ChangeBoonManagerMode(screen, button)
 	if button.Mode == "All" then
 		if screen.AllMode == nil or not screen.AllMode then
@@ -761,7 +765,7 @@ function mod.HandleBoonManagerClick(screen, button)
 			for i, traitData in pairs(CurrentRun.Hero.Traits) do
 				screen.Traits = CurrentRun.Hero.Traits
 				local numTraits = traitData.StackNum or 1
-				if numTraits < 100 and IsGodTrait(traitData.Name) and TraitData[traitData.Name] and IsGameStateEligible(CurrentRun, TraitData[traitData.Name]) and traitData.Rarity ~= "Legendary" then
+				if numTraits < 100 and traitData.RemainingUses == nil and IsGodTrait(traitData.Name) and not traitData.BlockStacking and (not traitData.RequiredFalseTrait or traitData.RequiredFalseTrait ~= traitData.Name) then
 					upgradableTraits[traitData.Name] = true
 				end
 			end
@@ -830,24 +834,69 @@ function mod.HandleBoonManagerClick(screen, button)
 					end
 				end
 			end
-			for _, colorButton in pairs(screen.Components) do
-				if colorButton.IsBackground == true and colorButton.Boon.Rarity ~= "Legendary" then
-					SetColor({ Id = colorButton.Id, Color = Color.BoonPatchHeroic })
+			if not IsEmpty(upgradableTraits) then
+				while not IsEmpty(upgradableTraits) do
+					local traitData = RemoveRandomValue(upgradableTraits)
+					upgradedTraits[traitData.Name] = true
+					local rarity = GetUpgradedRarity(traitData.Rarity)
+					RemoveTrait(CurrentRun.Hero, traitData.Name)
+					AddTraitToHero({
+						TraitData = GetProcessedTraitData({
+							Unit = CurrentRun.Hero,
+							TraitName = traitData.Name,
+							Rarity = rarity,
+							StackNum = traitData.StackNum
+						})
+					})
+				end
+				local ids = {}
+				for i, component in pairs(screen.Components) do
+					if component.ToDestroy then
+						table.insert(ids, component.Id)
+					end
+				end
+				Destroy({ Ids = ids })
+				mod.LoadPageBoons(screen)
+				mod.BoonManagerLoadPage(screen)
+			end
+			return
+		elseif screen.Mode == "Rarity" and screen.LockedModeButton.Substract == true then
+			local upgradableTraits = {}
+			local upgradedTraits = {}
+			for i, traitData in pairs(CurrentRun.Hero.Traits) do
+				if IsGodTrait(traitData.Name, { ForShop = true }) then
+					if TraitData[traitData.Name] and traitData.Rarity ~= nil and GetDowngradedRarity(traitData.Rarity) ~= nil and traitData.RarityLevels ~= nil and traitData.RarityLevels[GetDowngradedRarity(traitData.Rarity)] ~= nil then
+						if Contains(upgradableTraits, traitData) or traitData.Rarity == "Legendary" then
+						else
+							table.insert(upgradableTraits, traitData)
+						end
+					end
 				end
 			end
-			while not IsEmpty(upgradableTraits) do
-				local traitData = RemoveRandomValue(upgradableTraits)
-				upgradedTraits[traitData.Name] = true
-				RemoveTrait(CurrentRun.Hero, traitData.Name)
-				AddTraitToHero({
-					TraitData = GetProcessedTraitData({
-						Unit = CurrentRun.Hero,
-						TraitName = traitData.Name,
-						Rarity =
-						"Heroic",
-						StackNum = traitData.StackNum
+			if not IsEmpty(upgradableTraits) then
+				while not IsEmpty(upgradableTraits) do
+					local traitData = RemoveRandomValue(upgradableTraits)
+					upgradedTraits[traitData.Name] = true
+					local rarity = GetDowngradedRarity(traitData.Rarity)
+					RemoveTrait(CurrentRun.Hero, traitData.Name)
+					AddTraitToHero({
+						TraitData = GetProcessedTraitData({
+							Unit = CurrentRun.Hero,
+							TraitName = traitData.Name,
+							Rarity = rarity,
+							StackNum = traitData.StackNum
+						})
 					})
-				})
+				end
+				local ids = {}
+				for i, component in pairs(screen.Components) do
+					if component.ToDestroy then
+						table.insert(ids, component.Id)
+					end
+				end
+				Destroy({ Ids = ids })
+				mod.LoadPageBoons(screen)
+				mod.BoonManagerLoadPage(screen)
 			end
 			return
 		elseif screen.Mode == "Delete" then
@@ -858,7 +907,7 @@ function mod.HandleBoonManagerClick(screen, button)
 	else
 		--Individual mode
 		if screen.Mode == "Level" and screen.LockedModeButton.Add == true then
-			if GetTraitCount(CurrentRun.Hero, button.Boon.Name) < 100 and IsGodTrait(button.Boon.Name) and TraitData[button.Boon.Name] and IsGameStateEligible(CurrentRun, TraitData[button.Boon.Name]) and button.Boon.Rarity ~= "Legendary" then
+			if GetTraitCount(CurrentRun.Hero, button.Boon.Name) < 100 and button.Boon.RemainingUses == nil and IsGodTrait(button.Boon.Name) and not button.Boon.BlockStacking and (not button.Boon.RequiredFalseTrait or button.Boon.RequiredFalseTrait ~= button.Boon.Name) then
 				local traitData = GetHeroTrait(button.Boon.Name)
 				local stacks = GetTraitCount(CurrentRun.Hero, button.Boon.Name)
 				stacks = stacks + 1
@@ -872,7 +921,7 @@ function mod.HandleBoonManagerClick(screen, button)
 			end
 			return
 		elseif screen.Mode == "Level" and screen.LockedModeButton.Substract == true then
-			if GetTraitCount(CurrentRun.Hero, button.Boon) > 1 and IsGodTrait(button.Boon.Name) and TraitData[button.Boon.Name] and IsGameStateEligible(CurrentRun, TraitData[button.Boon.Name]) and button.Boon.Rarity ~= "Legendary" then
+			if GetTraitCount(CurrentRun.Hero, button.Boon) > 1 and button.Boon.RemainingUses == nil and IsGodTrait(button.Boon.Name) and not button.Boon.BlockStacking and (not button.Boon.RequiredFalseTrait or button.Boon.RequiredFalseTrait ~= button.Boon.Name) then
 				local traitData = GetHeroTrait(button.Boon.Name)
 				local stacks = GetTraitCount(button.Boon.Name)
 				stacks = stacks - 1
@@ -988,8 +1037,7 @@ function mod.BoonManagerLoadPage(screen)
 				local purchaseButtonKeyBG = "PurchaseButtonBG" .. boonData.index
 				screen.Components[purchaseButtonKeyBG] = CreateScreenComponent({
 					Name = "rectangle01",
-					Group =
-					"Combat_Menu_TraitTray",
+					Group = "Combat_Menu_TraitTray",
 					ScaleX = 1.87,
 					ScaleY = 0.65,
 					IsBackground = true,
