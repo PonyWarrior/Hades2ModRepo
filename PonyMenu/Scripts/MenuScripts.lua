@@ -480,9 +480,25 @@ function mod.ResourceMenuLoadPage(screen)
 					ScaleX = 1.15,
 					ToDestroy = true
 				})
+				SetInteractProperty({
+					DestinationId = screen.Components[purchaseButtonKey].Id,
+					Property = "TooltipOffsetY",
+					Value = 100
+				})
 				screen.Components[purchaseButtonKey].OnPressedFunctionName = mod.ChangeTargetResource
 				screen.Components[purchaseButtonKey].Resource = resourceData.name
 				screen.Components[purchaseButtonKey].Index = resourceData.index
+
+				local data = ResourceData[resourceData.name]
+				local icon = {
+					Name = "BlankObstacle",
+					Animation = data.IconPath or data.Icon,
+					Scale = data.IconScale or 0.5,
+					Group = "Combat_Menu_TraitTray",
+					ToDestroy = true
+				}
+				screen.Components[purchaseButtonKey .. "Icon"] = CreateScreenComponent(icon)
+				screen.Components[purchaseButtonKey].Icon = screen.Components[purchaseButtonKey .. "Icon"]
 				Attach({
 					Id = screen.Components[purchaseButtonKey].Id,
 					DestinationId = screen.Components.Background.Id,
@@ -502,6 +518,11 @@ function mod.ResourceMenuLoadPage(screen)
 					ShadowColor = { 0, 0, 0, 1 },
 					ShadowOffset = { 0, 2 },
 					Justification = "Center"
+				})
+				Attach({
+					Id = screen.Components[purchaseButtonKey .. "Icon"].Id,
+					DestinationId = screen.Components[purchaseButtonKey].Id,
+					OffsetX = -150
 				})
 			end
 		end
